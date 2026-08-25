@@ -94,15 +94,13 @@ function RepoCard({ repo }: { repo: Repo }) {
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               {repo.private ? (
-                <LockIcon
-                  size={16}
-                  style={{ color: hot ? '#d29922' : '#9198a1' }}
-                />
+                <span style={{ color: hot ? '#d29922' : '#9198a1' }}>
+                  <LockIcon size={16} />
+                </span>
               ) : (
-                <RepoIcon
-                  size={16}
-                  style={{ color: hot ? '#58a6ff' : '#9198a1' }}
-                />
+                <span style={{ color: hot ? '#58a6ff' : '#9198a1' }}>
+                  <RepoIcon size={16} />
+                </span>
               )}
               <span
                 className="truncate text-[15px] font-semibold"
