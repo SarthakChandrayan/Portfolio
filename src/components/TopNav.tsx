@@ -1,4 +1,5 @@
 import { MarkGithubIcon, SearchIcon } from '@primer/octicons-react'
+import { useState } from 'react'
 import { profile, tabs, type TabId } from '../data/profile'
 import { Magnetic } from './Motion'
 
@@ -9,6 +10,8 @@ type Props = {
 }
 
 export function TopNav({ active, onChange, onSearch }: Props) {
+  const [hot, setHot] = useState<TabId | null>(null)
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-black md:bg-black/80 md:backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1280px] items-center gap-3 px-4 py-3 md:px-8">
@@ -29,20 +32,35 @@ export function TopNav({ active, onChange, onSearch }: Props) {
         <nav className="ml-2 hidden items-center rounded-full border border-border bg-canvas-subtle p-1 lg:flex">
           {tabs.map((tab) => {
             const isActive = tab.id === active
+            const isHot = hot === tab.id
             return (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => onChange(tab.id)}
-                className={`rounded-full px-3 py-1.5 text-[13px] transition ${
+                onMouseEnter={() => setHot(tab.id)}
+                onMouseLeave={() => setHot(null)}
+                className={`rounded-full px-3 py-1.5 text-[13px] transition duration-150 ${
                   isActive
-                    ? 'bg-btn text-fg shadow-sm'
-                    : 'text-fg-muted hover:text-fg'
+                    ? 'bg-white font-medium text-black'
+                    : isHot
+                      ? '-translate-y-0.5 text-fg'
+                      : 'text-fg-muted'
                 }`}
               >
                 {tab.label}
                 {tab.count != null && (
-                  <span className="ml-1.5 text-fg-subtle">{tab.count}</span>
+                  <span
+                    className={`ml-1.5 transition-colors duration-150 ${
+                      isActive
+                        ? 'text-black/45'
+                        : isHot
+                          ? 'text-fg-muted'
+                          : 'text-fg-subtle'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
                 )}
               </button>
             )
