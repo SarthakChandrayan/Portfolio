@@ -17,7 +17,7 @@ function isTab(value: string): value is TabId {
 }
 
 export default function App() {
-  const { contributions, user, loading, live, error, reload } = useGithubData()
+  const { contributions, loading, live, error, reload } = useGithubData()
   const [tab, setTab] = useState<TabId>('overview')
   const [searchOpen, setSearchOpen] = useState(false)
 
@@ -65,7 +65,7 @@ export default function App() {
 
         <main className="mx-auto max-w-[1280px] px-4 py-8 md:px-8">
           <div className="flex flex-col gap-8 md:flex-row">
-            <ProfileSidebar user={user} />
+            <ProfileSidebar />
 
             <div key={tab} className="tab-in min-w-0 flex-1 space-y-6">
               {tab === 'overview' && (

@@ -9,14 +9,9 @@ import {
 import { useEffect, useState } from 'react'
 import { profile } from '../data/profile'
 import { copyText } from '../lib/toast'
-import type { GithubUser } from '../lib/github'
-import { CountUp, Magnetic } from './Motion'
+import { Magnetic } from './Motion'
 
-type Props = {
-  user: GithubUser | null
-}
-
-export function ProfileSidebar({ user }: Props) {
+export function ProfileSidebar() {
   const now = useIstTime()
 
   return (
@@ -68,11 +63,6 @@ export function ProfileSidebar({ user }: Props) {
         </a>
       </Magnetic>
 
-      <div className="mt-5 grid grid-cols-2 gap-2">
-        <StatChip label="followers" value={user?.followers ?? 1} />
-        <StatChip label="following" value={user?.following ?? 1} />
-      </div>
-
       <ul className="mt-5 space-y-2.5 text-[13px] text-fg md:text-[13px]">
         <li className="flex items-center gap-2">
           <OrganizationIcon size={16} className="text-fg-muted" />
@@ -116,17 +106,6 @@ export function ProfileSidebar({ user }: Props) {
         </li>
       </ul>
     </aside>
-  )
-}
-
-function StatChip({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-2xl border border-border bg-canvas-subtle px-3 py-2 text-center">
-      <div className="text-[18px] font-semibold">
-        <CountUp value={value} />
-      </div>
-      <div className="text-[11px] text-fg-muted">{label}</div>
-    </div>
   )
 }
 
