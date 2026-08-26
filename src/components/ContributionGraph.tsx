@@ -15,7 +15,7 @@ import {
   type ContributionPayload,
 } from '../lib/github'
 import { HeatmapCanvas } from './HeatmapCanvas'
-import { CountUp } from './Motion'
+import { CountUp, useDesktopLayout } from './Motion'
 
 type YearKey = 'last' | number
 
@@ -46,6 +46,7 @@ export function ContributionGraph({
   const [selected, setSelected] = useState<ContributionDay | null>(null)
   const [replayKey, setReplayKey] = useState(0)
   const heatRef = useRef<HTMLDivElement>(null)
+  const desktop = useDesktopLayout()
   const light = useRef({ raf: 0, x: 0, y: 0, el: null as HTMLElement | null })
 
   const days = useMemo(() => {
@@ -103,7 +104,7 @@ export function ContributionGraph({
           <p className="font-mono text-[11px] tracking-widest text-fg-subtle uppercase">
             Live activity
           </p>
-          <h2 className="text-[20px] font-semibold tracking-tight text-fg">
+          <h2 className="text-[17px] font-semibold tracking-tight text-fg md:text-[20px]">
             <CountUp value={total} /> {heading}
           </h2>
         </div>
@@ -133,7 +134,7 @@ export function ContributionGraph({
           <button
             type="button"
             onClick={() => setReplayKey((k) => k + 1)}
-            className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[12px] text-fg-muted hover:border-fg-subtle hover:text-fg"
+            className="hidden items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[12px] text-fg-muted hover:border-fg-subtle hover:text-fg md:inline-flex"
           >
             <PlayIcon size={12} />
             Replay
@@ -141,7 +142,7 @@ export function ContributionGraph({
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1">
+      <div className="mb-4 flex flex-wrap gap-1 max-md:flex-nowrap max-md:overflow-x-auto max-md:px-1 max-md:pb-1">
         <YearButton
           active={year === 'last'}
           onClick={() => pickYear('last')}
@@ -157,49 +158,88 @@ export function ContributionGraph({
         ))}
       </div>
 
-      <div ref={heatRef} className="contrib-heatmap">
-        <div className="grid w-full grid-cols-[28px_minmax(0,1fr)] gap-x-2">
-          <div />
-          <div
-            className="mb-1 grid text-[10px] text-fg-muted"
-            style={{
-              gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-            }}
-          >
-            {labels.map((label, i) => (
-              <span
-                key={`m-${i}`}
-                className="pointer-events-none w-0 overflow-visible whitespace-nowrap"
-              >
-                {label}
-              </span>
-            ))}
+      <div
+        ref={heatRef}
+        className={`contrib-heatmap ${desktop ? '' : 'is-revealing'}`}
+      >
+        {desktop ? (
+          <div className="grid w-full grid-cols-[28px_minmax(0,1fr)] gap-x-2">
+            <div />
+            <div
+              className="mb-1 grid text-[10px] text-fg-muted"
+              style={{
+                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+              }}
+            >
+              {labels.map((label, i) => (
+                <span
+                  key={`m-${i}`}
+                  className="pointer-events-none w-0 overflow-visible whitespace-nowrap"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+            <Weekdays />
+            <HeatmapCanvas
+              weeks={weeks}
+              loading={loading && !days.length}
+              selected={selected}
+              replayKey={replayKey}
+              revealRoot={heatRef}
+              fullColor={false}
+              onSelect={(day) =>
+                setSelected((prev) => (prev?.date === day.date ? null : day))
+              }
+            />
           </div>
-
-          <div className="flex flex-col justify-between py-[1px] text-[10px] leading-none text-fg-muted">
-            <span />
-            <span>Mon</span>
-            <span />
-            <span>Wed</span>
-            <span />
-            <span>Fri</span>
-            <span />
+        ) : (
+          <div className="flex gap-2">
+            <div className="flex w-7 shrink-0 flex-col">
+              <div className="mb-1 h-[14px] shrink-0" aria-hidden />
+              <Weekdays className="min-h-0 flex-1" />
+            </div>
+            <div
+              className="gh-scrollbar graph-scroll min-w-0 flex-1 overflow-x-auto overscroll-x-contain pb-2"
+              dir="rtl"
+            >
+              <div className="min-w-[680px]" dir="ltr">
+                <div
+                  className="mb-1 grid text-[10px] text-fg-muted"
+                  style={{
+                    gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {labels.map((label, i) => (
+                    <span
+                      key={`m-${i}`}
+                      className="pointer-events-none w-0 overflow-visible whitespace-nowrap"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+                <HeatmapCanvas
+                  weeks={weeks}
+                  loading={loading && !days.length}
+                  selected={selected}
+                  replayKey={replayKey}
+                  revealRoot={heatRef}
+                  fullColor
+                  onSelect={(day) =>
+                    setSelected((prev) => (prev?.date === day.date ? null : day))
+                  }
+                />
+              </div>
+            </div>
           </div>
-
-          <HeatmapCanvas
-            weeks={weeks}
-            loading={loading && !days.length}
-            selected={selected}
-            replayKey={replayKey}
-            revealRoot={heatRef}
-            onSelect={(day) =>
-              setSelected((prev) => (prev?.date === day.date ? null : day))
-            }
-          />
-        </div>
+        )}
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[12px] text-fg-muted">
-          <p>Sweep the graph to reveal GitHub greens · click a day to pin</p>
+          <p className="md:hidden">Swipe for earlier months · tap a day</p>
+          <p className="hidden md:block">
+            Sweep the graph to reveal GitHub greens · click a day to pin
+          </p>
           <div className="flex items-center gap-1">
             Less
             <span className="legend-gray flex items-center gap-1">
@@ -233,7 +273,9 @@ export function ContributionGraph({
             {contributionPhrase(selected.count, selected.date)}
           </div>
           <div className="mt-1 text-fg-muted">
-            Intensity level {selected.level} of 4 · click again to unpin
+            Intensity level {selected.level} of 4 ·{' '}
+            <span className="md:hidden">tap again to unpin</span>
+            <span className="hidden md:inline">click again to unpin</span>
           </div>
         </div>
       )}
@@ -271,7 +313,7 @@ function YearButton({
     <button
       type="button"
       onClick={onClick}
-      className={`h-8 rounded-full px-3 text-[12px] transition ${
+      className={`h-8 shrink-0 rounded-full px-3 text-[12px] transition ${
         active
           ? 'bg-white text-black'
           : 'text-fg-muted hover:bg-btn hover:text-fg'
@@ -279,6 +321,22 @@ function YearButton({
     >
       {label}
     </button>
+  )
+}
+
+function Weekdays({ className = '' }: { className?: string }) {
+  return (
+    <div
+      className={`flex flex-col justify-between py-[1px] text-[10px] leading-none text-fg-muted ${className}`}
+    >
+      <span />
+      <span>Mon</span>
+      <span />
+      <span>Wed</span>
+      <span />
+      <span>Fri</span>
+      <span />
+    </div>
   )
 }
 

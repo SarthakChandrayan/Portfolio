@@ -96,7 +96,7 @@ export function TopNav({ active, onChange, onSearch }: Props) {
             onClick={() => onChange(tab.id)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-[13px] ${
               tab.id === active
-                ? 'bg-btn text-fg'
+                ? 'bg-white font-medium text-black'
                 : 'text-fg-muted hover:text-fg'
             }`}
           >

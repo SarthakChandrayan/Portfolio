@@ -19,6 +19,7 @@ type Props = {
   replayKey: number
   revealRoot: RefObject<HTMLElement | null>
   onSelect: (day: ContributionDay) => void
+  fullColor?: boolean
 }
 
 export function HeatmapCanvas({
@@ -28,12 +29,13 @@ export function HeatmapCanvas({
   replayKey,
   revealRoot,
   onSelect,
+  fullColor = false,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const tipRef = useRef<HTMLDivElement>(null)
-  const latest = useRef({ weeks, loading, selected, onSelect, replayKey })
-  latest.current = { weeks, loading, selected, onSelect, replayKey }
+  const latest = useRef({ weeks, loading, selected, onSelect, replayKey, fullColor })
+  latest.current = { weeks, loading, selected, onSelect, replayKey, fullColor }
 
   const api = useRef<{
     rebuild: () => void
@@ -198,10 +200,16 @@ export function HeatmapCanvas({
     const paint = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, cssW, cssH)
-      ctx.drawImage(gray, 0, 0, cssW, cssH)
+
+      const full = latest.current.fullColor
+      if (full) {
+        ctx.drawImage(green, 0, 0, cssW, cssH)
+      } else {
+        ctx.drawImage(gray, 0, 0, cssW, cssH)
+      }
 
       const pinned = findDayPos(latest.current.selected)
-      if (pinned) {
+      if (pinned && !full) {
         const { x, y } = cellAt(pinned.col, pinned.row)
         ctx.fillStyle = GITHUB_GREEN[Math.min(pinned.day.level, 4)]
         ctx.beginPath()
@@ -209,7 +217,7 @@ export function HeatmapCanvas({
         ctx.fill()
       }
 
-      if (spot.on || replay.active) {
+      if (!full && (spot.on || replay.active)) {
         sctx.setTransform(dpr, 0, 0, dpr, 0, 0)
         sctx.globalCompositeOperation = 'source-over'
         sctx.clearRect(0, 0, cssW, cssH)
@@ -253,15 +261,16 @@ export function HeatmapCanvas({
       })
     }
 
+    const setRevealing = (on: boolean) => {
+      revealRoot.current?.classList.toggle('is-revealing', on)
+    }
+
     const rebuild = () => {
       if (!measure()) return
       drawLayer(gctx, GRAY)
       drawLayer(cctx, GITHUB_GREEN)
+      if (latest.current.fullColor) setRevealing(true)
       paint()
-    }
-
-    const setRevealing = (on: boolean) => {
-      revealRoot.current?.classList.toggle('is-revealing', on)
     }
 
     const pinched = () => (window.visualViewport?.scale ?? 1) > 1.02
@@ -291,7 +300,7 @@ export function HeatmapCanvas({
     }
 
     const onMove = (e: PointerEvent) => {
-      if (!e.isPrimary || pinched()) return
+      if (!e.isPrimary || pinched() || latest.current.fullColor) return
       const rect = canvas.getBoundingClientRect()
       spot.x = e.clientX - rect.left
       spot.y = e.clientY - rect.top
@@ -305,6 +314,10 @@ export function HeatmapCanvas({
     }
 
     const onLeave = () => {
+      if (latest.current.fullColor) {
+        hideTip()
+        return
+      }
       spot.on = false
       setRevealing(false)
       hideTip()
@@ -344,7 +357,7 @@ export function HeatmapCanvas({
 
   useEffect(() => {
     api.current?.rebuild()
-  }, [weeks, loading])
+  }, [weeks, loading, fullColor])
 
   useEffect(() => {
     api.current?.paint()
@@ -359,8 +372,14 @@ export function HeatmapCanvas({
       <div ref={wrapRef} className="relative w-full min-w-0">
         <canvas
           ref={canvasRef}
-          className="block w-full touch-pan-y cursor-crosshair"
-          aria-label="Contribution heatmap. Move the cursor to reveal GitHub greens."
+          className={`block w-full cursor-crosshair ${
+            fullColor ? 'touch-manipulation' : 'touch-pan-y'
+          }`}
+          aria-label={
+            fullColor
+              ? 'Contribution heatmap. Swipe to see earlier months, tap a day to pin it.'
+              : 'Contribution heatmap. Move the cursor to reveal GitHub greens.'
+          }
         />
       </div>
       {createPortal(

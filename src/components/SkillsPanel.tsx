@@ -7,12 +7,13 @@ export function SkillsPanel() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-border bg-canvas-overlay/60 p-6 md:p-8">
+      <section className="rounded-3xl border border-border bg-canvas-overlay/60 p-5 md:p-8">
         <h2 className="text-[28px] font-semibold tracking-tight text-fg md:text-[32px]">
           Languages
         </h2>
         <p className="mt-1 mb-8 text-[16px] text-fg-muted">
-          Click a language to highlight it.
+          <span className="md:hidden">Tap a language to highlight it.</span>
+          <span className="hidden md:inline">Click a language to highlight it.</span>
         </p>
 
         <div className="space-y-6">
@@ -64,7 +65,7 @@ function TopicBlock({ title, items }: { title: string; items: string[] }) {
   const [picked, setPicked] = useState<string | null>(null)
 
   return (
-    <section className="rounded-3xl border border-border bg-canvas-overlay/60 p-6 md:p-8">
+    <section className="rounded-3xl border border-border bg-canvas-overlay/60 p-5 md:p-8">
       <h2 className="mb-6 text-[28px] font-semibold tracking-tight text-fg md:text-[32px]">
         {title}
       </h2>

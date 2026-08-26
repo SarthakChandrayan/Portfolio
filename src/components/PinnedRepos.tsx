@@ -6,7 +6,7 @@ import {
 } from '@primer/octicons-react'
 import { useState } from 'react'
 import { repos, type Repo } from '../data/profile'
-import { TiltCard } from './Motion'
+import { TiltCard, useDesktopLayout } from './Motion'
 
 type Props = {
   query?: string
@@ -40,7 +40,9 @@ export function PinnedRepos({
             Featured work
           </h2>
           <span className="text-[12px] text-fg-muted">
-            {filtered.length} projects · click a card
+            {filtered.length} projects ·{' '}
+            <span className="md:hidden">tap a card</span>
+            <span className="hidden md:inline">click a card</span>
           </span>
         </div>
       )}
@@ -75,6 +77,8 @@ function RepoCard({ repo }: { repo: Repo }) {
   const [open, setOpen] = useState(false)
   const [hot, setHot] = useState(false)
   const [topicHover, setTopicHover] = useState<string | null>(null)
+  const desktop = useDesktopLayout()
+  const lit = desktop ? hot : true
 
   return (
     <TiltCard className="rounded-3xl border border-border bg-canvas-overlay/70">
@@ -94,17 +98,17 @@ function RepoCard({ repo }: { repo: Repo }) {
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               {repo.private ? (
-                <span style={{ color: hot ? '#d29922' : '#9198a1' }}>
+                <span style={{ color: lit ? '#d29922' : '#9198a1' }}>
                   <LockIcon size={16} />
                 </span>
               ) : (
-                <span style={{ color: hot ? '#58a6ff' : '#9198a1' }}>
+                <span style={{ color: lit ? '#58a6ff' : '#9198a1' }}>
                   <RepoIcon size={16} />
                 </span>
               )}
               <span
                 className="truncate text-[15px] font-semibold"
-                style={{ color: hot ? '#58a6ff' : '#f0f6fc' }}
+                style={{ color: lit ? '#58a6ff' : '#f0f6fc' }}
               >
                 {repo.name}
               </span>
@@ -112,8 +116,8 @@ function RepoCard({ repo }: { repo: Repo }) {
             <span
               className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
               style={{
-                borderColor: hot ? 'rgba(88,166,255,0.45)' : '#3d444d',
-                color: hot ? '#79c0ff' : '#9198a1',
+                borderColor: lit ? 'rgba(88,166,255,0.45)' : '#3d444d',
+                color: lit ? '#79c0ff' : '#9198a1',
               }}
             >
               {repo.private ? 'Private' : 'Public'}
@@ -132,7 +136,7 @@ function RepoCard({ repo }: { repo: Repo }) {
               <li key={item} className="flex gap-2">
                 <span
                   className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ background: hot ? '#3fb950' : '#f0f6fc' }}
+                  style={{ background: lit ? '#3fb950' : '#f0f6fc' }}
                 />
                 {item}
               </li>
@@ -145,16 +149,16 @@ function RepoCard({ repo }: { repo: Repo }) {
             <span
               className="inline-block h-2.5 w-2.5 rounded-full"
               style={{
-                background: hot ? repo.languageColor : 'rgba(240,246,252,0.7)',
+                background: lit ? repo.languageColor : 'rgba(240,246,252,0.7)',
               }}
             />
-            <span style={{ color: hot ? repo.languageColor : undefined }}>
+            <span style={{ color: lit ? repo.languageColor : undefined }}>
               {repo.language}
             </span>
           </span>
           {repo.topics.slice(0, 3).map((topic) => {
             const color = topicColors[topic] ?? '#79c0ff'
-            const on = hot || topicHover === topic
+            const on = lit || topicHover === topic
             return (
               <span
                 key={topic}
@@ -177,7 +181,7 @@ function RepoCard({ repo }: { repo: Repo }) {
               target="_blank"
               rel="noreferrer"
               className="ml-auto inline-flex items-center gap-1 no-underline"
-              style={{ color: hot ? '#3fb950' : '#9198a1' }}
+              style={{ color: lit ? '#3fb950' : '#9198a1' }}
               onClick={(e) => e.stopPropagation()}
             >
               <LinkExternalIcon size={12} />

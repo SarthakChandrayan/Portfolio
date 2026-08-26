@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TiltCard } from './Motion'
+import { TiltCard, useDesktopLayout } from './Motion'
 import { profile } from '../data/profile'
 
 const stack = [
@@ -64,21 +64,23 @@ function TerminalCard() {
   const [typed, setTyped] = useState('')
   const [hot, setHot] = useState(false)
   const [stackHover, setStackHover] = useState<string | null>(null)
+  const desktop = useDesktopLayout()
+  const lit = desktop ? hot : true
 
   const commands = [
     {
       q: 'whoami',
       output: (
         <>
-          <span style={{ color: hot ? '#3fb950' : undefined }}>
+          <span style={{ color: lit ? '#3fb950' : undefined }}>
             {profile.name}
           </span>
           {' — '}
-          <span style={{ color: hot ? '#79c0ff' : undefined }}>
+          <span style={{ color: lit ? '#79c0ff' : undefined }}>
             {profile.title}
           </span>
           {' @ '}
-          <span style={{ color: hot ? '#d2a8ff' : undefined }}>
+          <span style={{ color: lit ? '#d2a8ff' : undefined }}>
             {profile.company}
           </span>
         </>
@@ -87,7 +89,7 @@ function TerminalCard() {
     {
       q: 'cat focus.md',
       output: (
-        <span style={{ color: hot ? '#a5d6ff' : undefined }}>
+        <span style={{ color: lit ? '#a5d6ff' : undefined }}>
           Scalable frontends · API-driven systems · clean architecture
         </span>
       ),
@@ -102,7 +104,7 @@ function TerminalCard() {
               className="cursor-default"
               style={{
                 color:
-                  stackHover === item.name || hot ? item.color : undefined,
+                  stackHover === item.name || lit ? item.color : undefined,
               }}
               onMouseEnter={() => setStackHover(item.name)}
               onMouseLeave={() => setStackHover(null)}
@@ -160,13 +162,13 @@ function TerminalCard() {
       <div className="space-y-4 px-4 py-5 font-mono text-[13px] md:text-[14px]">
         {commands.slice(0, step).map((item) => (
           <div key={item.q}>
-            <PromptLine text={item.q} hot={hot} />
+            <PromptLine text={item.q} hot={lit} />
             <p className="mt-1 text-fg-muted">{item.output}</p>
           </div>
         ))}
 
         <div>
-          <PromptLine text={typed} caret hot={hot} />
+          <PromptLine text={typed} caret hot={lit} />
           {done && <p className="mt-1 text-fg-muted">{current.output}</p>}
         </div>
 
@@ -175,7 +177,7 @@ function TerminalCard() {
             type="button"
             onClick={() => setStep((s) => s + 1)}
             className="rounded-full border border-border px-3 py-1 text-[12px] text-fg-muted"
-            style={hot ? { borderColor: '#3fb950', color: '#3fb950' } : undefined}
+            style={lit ? { borderColor: '#3fb950', color: '#3fb950' } : undefined}
           >
             run next command →
           </button>
@@ -185,7 +187,7 @@ function TerminalCard() {
           <button
             type="button"
             className="text-[12px] text-fg-muted"
-            style={hot ? { color: '#58a6ff' } : undefined}
+            style={lit ? { color: '#58a6ff' } : undefined}
             onClick={() => {
               setStep(0)
               setTyped('')

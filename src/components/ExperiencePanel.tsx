@@ -29,7 +29,7 @@ export function ExperiencePanel() {
                 <button
                   type="button"
                   onClick={() => setOpen(expanded ? '' : id)}
-                  className="w-full rounded-3xl border border-border bg-canvas-overlay/70 p-4 text-left hover:border-fg-subtle"
+                  className="w-full rounded-3xl border border-border bg-canvas-overlay/70 p-4 text-left tap-press hover:border-fg-subtle"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>

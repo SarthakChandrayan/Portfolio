@@ -7,6 +7,23 @@ import {
 } from 'react'
 import { subscribeToasts } from '../lib/toast'
 
+export function useDesktopLayout() {
+  const [wide, setWide] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return window.matchMedia('(min-width: 768px)').matches
+  })
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)')
+    const apply = () => setWide(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  return wide
+}
+
 export function CountUp({
   value,
   className,
@@ -151,19 +168,25 @@ export function Ambient() {
   }, [])
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 hidden overflow-hidden md:block">
-      <div
-        className="absolute h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
-        style={{
-          left: `${pos.x}%`,
-          top: `${pos.y}%`,
-          background:
-            'radial-gradient(circle, rgba(255,255,255,0.22), rgba(255,255,255,0.05), transparent 68%)',
-        }}
-      />
-      <div className="ambient-grid absolute inset-0" />
-      <div className="grain absolute inset-0" />
-    </div>
+    <>
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden md:hidden">
+        <div className="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.1),transparent_68%)]" />
+        <div className="grain absolute inset-0" />
+      </div>
+      <div className="pointer-events-none fixed inset-0 z-0 hidden overflow-hidden md:block">
+        <div
+          className="absolute h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
+          style={{
+            left: `${pos.x}%`,
+            top: `${pos.y}%`,
+            background:
+              'radial-gradient(circle, rgba(255,255,255,0.22), rgba(255,255,255,0.05), transparent 68%)',
+          }}
+        />
+        <div className="ambient-grid absolute inset-0" />
+        <div className="grain absolute inset-0" />
+      </div>
+    </>
   )
 }
 

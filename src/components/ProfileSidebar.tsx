@@ -21,8 +21,8 @@ export function ProfileSidebar({ user }: Props) {
 
   return (
     <aside className="md:w-[280px] md:shrink-0">
-      <div className="flex gap-4 md:block">
-        <div className="relative mx-auto w-[88px] shrink-0 md:w-[196px]">
+      <div className="flex flex-col items-center text-center md:block">
+        <div className="relative w-[120px] shrink-0 md:mx-auto md:w-[196px]">
           <div className="relative p-[3px]">
             <div className="avatar-ring absolute inset-0 rounded-full" aria-hidden />
             <img
@@ -37,8 +37,8 @@ export function ProfileSidebar({ user }: Props) {
           <IstClock now={now} />
         </div>
 
-        <div className="min-w-0 py-1 md:mt-5 md:text-center">
-          <h1 className="text-[26px] leading-tight font-semibold tracking-tight text-fg">
+        <div className="mt-3 min-w-0 md:mt-5">
+          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-fg md:text-[26px]">
             {profile.name}
           </h1>
           <p className="font-mono text-[13px] text-fg-muted">
@@ -47,7 +47,7 @@ export function ProfileSidebar({ user }: Props) {
         </div>
       </div>
 
-      <p className="mt-4 text-[14px] text-fg-muted md:text-center">{profile.bio}</p>
+      <p className="mt-4 text-center text-[14px] text-fg-muted">{profile.bio}</p>
 
       <div className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-border bg-canvas-subtle/80 px-3 py-2 text-[13px]">
         <span className="relative flex h-2 w-2">
@@ -73,7 +73,7 @@ export function ProfileSidebar({ user }: Props) {
         <StatChip label="following" value={user?.following ?? 1} />
       </div>
 
-      <ul className="mt-5 space-y-2.5 text-[13px] text-fg">
+      <ul className="mt-5 space-y-2.5 text-[13px] text-fg md:text-[13px]">
         <li className="flex items-center gap-2">
           <OrganizationIcon size={16} className="text-fg-muted" />
           <a href={profile.companyUrl} target="_blank" rel="noreferrer">

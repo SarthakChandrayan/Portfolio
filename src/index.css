@@ -106,11 +106,24 @@ a.btn-solid:hover {
   .light-up {
     transform: none !important;
     transform-style: flat;
-    background-image: none;
   }
 
   .avatar-ring {
     animation: none;
+  }
+
+  .tap-press:active {
+    transform: scale(0.985) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .contrib-heatmap .legend-gray {
+    display: none;
+  }
+
+  .contrib-heatmap .legend-green {
+    display: flex;
   }
 }
 
@@ -314,6 +327,11 @@ a.btn-solid:hover {
 
 .gh-scrollbar::-webkit-scrollbar-track {
   background: transparent;
+}
+
+.graph-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 @media (prefers-reduced-motion: reduce) {
