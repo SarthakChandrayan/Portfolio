@@ -22,36 +22,90 @@ export function ReadmeCard() {
 }
 
 function AboutCard() {
+  const [hot, setHot] = useState(false)
+  const desktop = useDesktopLayout()
+  const lit = desktop ? hot : true
+
   return (
     <TiltCard tilt={false} className="rounded-3xl border border-border bg-canvas-overlay/80">
-      <div className="p-5 md:p-6">
-        <p className="font-mono text-[11px] tracking-widest text-fg-subtle uppercase">
+      <div
+        className="p-5 md:p-6"
+        onMouseEnter={() => setHot(true)}
+        onMouseLeave={() => setHot(false)}
+      >
+        <p
+          className="font-mono text-[11px] tracking-widest uppercase"
+          style={{ color: lit ? '#79c0ff' : '#737373' }}
+        >
           About
         </p>
         <h2 className="mt-1 text-[24px] font-semibold tracking-tight">
-          Hi, I&apos;m Sarthak
+          Hi, I&apos;m{' '}
+          <span style={{ color: lit ? '#58a6ff' : undefined }}>Sarthak</span>
         </h2>
         <p className="mt-3 text-[15px] text-fg-muted">
-          <strong className="text-fg">{profile.title}</strong> at{' '}
-          <a href={profile.companyUrl} target="_blank" rel="noreferrer">
+          <strong style={{ color: lit ? '#79c0ff' : '#f5f5f5' }}>
+            {profile.title}
+          </strong>{' '}
+          at{' '}
+          <a
+            href={profile.companyUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: lit ? '#d2a8ff' : undefined }}
+          >
             {profile.company}
           </a>
           . {profile.bio} {profile.summary}
         </p>
         <ul className="mt-4 space-y-2 text-[14px] text-fg">
-          <li>
-            Currently building marketplace, coaching, and athlete-engagement
-            systems at Thravos
+          <li className="flex gap-2">
+            <span
+              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ background: lit ? '#3fb950' : '#f5f5f5' }}
+            />
+            <span>
+              Currently building marketplace, coaching, and athlete-engagement
+              systems at{' '}
+              <span style={{ color: lit ? '#d2a8ff' : undefined }}>Thravos</span>
+            </span>
           </li>
-          <li>
-            Focused on React, Next.js, Angular, Node.js, and high-performance
-            frontend architecture
+          <li className="flex gap-2">
+            <span
+              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ background: lit ? '#3fb950' : '#f5f5f5' }}
+            />
+            <span>
+              Focused on{' '}
+              <span style={{ color: lit ? '#58a6ff' : undefined }}>React</span>
+              ,{' '}
+              <span style={{ color: lit ? '#f0f6fc' : undefined }}>Next.js</span>
+              ,{' '}
+              <span style={{ color: lit ? '#f85149' : undefined }}>Angular</span>
+              ,{' '}
+              <span style={{ color: lit ? '#3fb950' : undefined }}>Node.js</span>
+              , and high-performance frontend architecture
+            </span>
           </li>
-          <li>
-            {profile.email} ·{' '}
-            <a href={profile.linkedin} target="_blank" rel="noreferrer">
-              LinkedIn
-            </a>
+          <li className="flex gap-2">
+            <span
+              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ background: lit ? '#3fb950' : '#f5f5f5' }}
+            />
+            <span>
+              <span style={{ color: lit ? '#79c0ff' : undefined }}>
+                {profile.email}
+              </span>
+              {' · '}
+              <a
+                href={profile.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: lit ? '#58a6ff' : undefined }}
+              >
+                LinkedIn
+              </a>
+            </span>
           </li>
         </ul>
       </div>
