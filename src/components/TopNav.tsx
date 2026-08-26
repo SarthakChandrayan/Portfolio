@@ -10,7 +10,7 @@ type Props = {
 
 export function TopNav({ active, onChange, onSearch }: Props) {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-black/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-black md:bg-black/80 md:backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1280px] items-center gap-3 px-4 py-3 md:px-8">
         <button
           type="button"

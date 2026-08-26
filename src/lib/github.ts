@@ -156,7 +156,7 @@ export function monthLabels(weeks: WeekCell[][]): string[] {
         show = prevMonth !== month
       }
     }
-    if (show && index - lastLabeled >= 2) {
+    if (show && index - lastLabeled >= 2 && weeks.length - index >= 2) {
       labels.push(MONTHS[month])
       lastLabeled = index
     } else {
@@ -166,20 +166,32 @@ export function monthLabels(weeks: WeekCell[][]): string[] {
   return labels
 }
 
+function isoDate(d: Date) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function byDate(a: ContributionDay, b: ContributionDay) {
+  if (a.date < b.date) return -1
+  if (a.date > b.date) return 1
+  return 0
+}
+
 export function lastYearDays(all: ContributionDay[], now = new Date()) {
-  const end = new Date(now)
-  end.setHours(0, 0, 0, 0)
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const start = new Date(end)
-  start.setDate(start.getDate() - 364)
-  const from = start.toISOString().slice(0, 10)
-  const to = end.toISOString().slice(0, 10)
-  return all.filter((d) => d.date >= from && d.date <= to)
+  start.setFullYear(start.getFullYear() - 1)
+  const from = isoDate(start)
+  const to = isoDate(end)
+  return all.filter((d) => d.date >= from && d.date <= to).sort(byDate)
 }
 
 export function yearDays(all: ContributionDay[], year: number) {
   const from = `${year}-01-01`
   const to = `${year}-12-31`
-  return all.filter((d) => d.date >= from && d.date <= to)
+  return all.filter((d) => d.date >= from && d.date <= to).sort(byDate)
 }
 
 export function sumCounts(days: ContributionDay[]) {

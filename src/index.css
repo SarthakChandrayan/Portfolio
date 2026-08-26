@@ -101,6 +101,19 @@ a.btn-solid:hover {
   );
 }
 
+@media (hover: none) {
+  .tilt-card,
+  .light-up {
+    transform: none !important;
+    transform-style: flat;
+    background-image: none;
+  }
+
+  .avatar-ring {
+    animation: none;
+  }
+}
+
 .light-up:hover,
 .tilt-card:hover {
   border-color: rgba(255, 255, 255, 0.45) !important;

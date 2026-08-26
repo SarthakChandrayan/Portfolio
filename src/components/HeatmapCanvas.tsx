@@ -75,9 +75,12 @@ export function HeatmapCanvas({
 
     const sizeBuffers = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const w = Math.max(1, Math.round(cssW * dpr))
+      const h = Math.max(1, Math.round(cssH * dpr))
       for (const surface of [canvas, gray, green, scratch]) {
-        surface.width = Math.max(1, Math.round(cssW * dpr))
-        surface.height = Math.max(1, Math.round(cssH * dpr))
+        if (surface.width === w && surface.height === h) continue
+        surface.width = w
+        surface.height = h
       }
       canvas.style.width = `${cssW}px`
       canvas.style.height = `${cssH}px`
@@ -86,12 +89,14 @@ export function HeatmapCanvas({
 
     const measure = () => {
       const width = wrap.clientWidth
+      if (width < 8) return false
       const data = grid()
       cols = Math.max(data.length, 1)
       cell = Math.max(0, (width - GAP * Math.max(cols - 1, 0)) / cols)
       cssW = width
       cssH = cell * ROWS + GAP * (ROWS - 1)
       sizeBuffers()
+      return true
     }
 
     const cellAt = (col: number, row: number) => ({
@@ -249,7 +254,7 @@ export function HeatmapCanvas({
     }
 
     const rebuild = () => {
-      measure()
+      if (!measure()) return
       drawLayer(gctx, GRAY)
       drawLayer(cctx, GITHUB_GREEN)
       paint()
@@ -258,6 +263,8 @@ export function HeatmapCanvas({
     const setRevealing = (on: boolean) => {
       revealRoot.current?.classList.toggle('is-revealing', on)
     }
+
+    const pinched = () => (window.visualViewport?.scale ?? 1) > 1.02
 
     const startReplay = () => {
       if (replay.raf) cancelAnimationFrame(replay.raf)
@@ -284,6 +291,7 @@ export function HeatmapCanvas({
     }
 
     const onMove = (e: PointerEvent) => {
+      if (!e.isPrimary || pinched()) return
       const rect = canvas.getBoundingClientRect()
       spot.x = e.clientX - rect.left
       spot.y = e.clientY - rect.top
@@ -309,7 +317,12 @@ export function HeatmapCanvas({
       if (next) latest.current.onSelect(next.day)
     }
 
-    const ro = new ResizeObserver(() => rebuild())
+    const ro = new ResizeObserver(() => {
+      if (pinched()) return
+      const width = wrap.clientWidth
+      if (cssW > 0 && Math.abs(width - cssW) < 1) return
+      rebuild()
+    })
     ro.observe(wrap)
     canvas.addEventListener('pointermove', onMove, { passive: true })
     canvas.addEventListener('pointerleave', onLeave)
@@ -346,7 +359,7 @@ export function HeatmapCanvas({
       <div ref={wrapRef} className="relative w-full min-w-0">
         <canvas
           ref={canvasRef}
-          className="block w-full cursor-crosshair"
+          className="block w-full touch-pan-y cursor-crosshair"
           aria-label="Contribution heatmap. Move the cursor to reveal GitHub greens."
         />
       </div>

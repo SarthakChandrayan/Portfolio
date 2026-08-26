@@ -167,7 +167,10 @@ export function ContributionGraph({
             }}
           >
             {labels.map((label, i) => (
-              <span key={`m-${i}`} className="overflow-hidden">
+              <span
+                key={`m-${i}`}
+                className="pointer-events-none w-0 overflow-visible whitespace-nowrap"
+              >
                 {label}
               </span>
             ))}

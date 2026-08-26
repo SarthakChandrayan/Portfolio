@@ -151,7 +151,7 @@ export function Ambient() {
   }, [])
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    <div className="pointer-events-none fixed inset-0 z-0 hidden overflow-hidden md:block">
       <div
         className="absolute h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
         style={{
