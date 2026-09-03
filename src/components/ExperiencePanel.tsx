@@ -61,14 +61,19 @@ export function ExperiencePanel() {
                     </div>
                   </div>
                   {expanded && (
-                    <ul className="mt-3 space-y-1.5 border-t border-border pt-3 text-[14px] text-fg">
-                      {role.bullets.map((bullet) => (
-                        <li key={bullet} className="flex gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
-                          {bullet}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="mt-3 space-y-3 border-t border-border pt-3">
+                      {role.summary && (
+                        <p className="text-[14px] text-fg-muted">{role.summary}</p>
+                      )}
+                      <ul className="space-y-1.5 text-[14px] text-fg">
+                        {role.bullets.map((bullet) => (
+                          <li key={bullet} className="flex gap-2">
+                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
+                            {bullet}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                 </button>
               </li>

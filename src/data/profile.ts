@@ -13,7 +13,7 @@ export const profile = {
   avatar: '/avatar-lg.jpg',
   bio: 'Product-focused Full-Stack Engineer specializing in scalable web applications, high-performance frontend systems, and resilient backend integrations.',
   summary:
-    'Experienced in building responsive user experiences, API-driven architectures, and modern full-stack platforms using React, Next.js, Angular, and Node.js. Passionate about performance optimization, clean system design, and delivering seamless digital experiences.',
+    'Experienced in building responsive user experiences, API-driven architectures, and modern full-stack platforms using React, Next.js, Angular, and Node.js. Passionate about performance optimization, clean system design, and delivering seamless digital experiences. Also work across TypeScript/Node APIs and the React Native, Next.js, and admin apps that consume them, keeping client behavior consistent when contracts change.',
 }
 
 export type Repo = {
@@ -29,6 +29,21 @@ export type Repo = {
 
 export const repos: Repo[] = [
   {
+    name: 'thravos',
+    description:
+      'Consumer fitness platform. Shared APIs consumed by the React Native app, Next.js web, and admin.',
+    language: 'TypeScript',
+    languageColor: '#3178c6',
+    topics: ['react-native', 'nextjs', 'nodejs', 'mongodb'],
+    private: true,
+    highlights: [
+      'Shared TypeScript/Node APIs used by the React Native app and Next.js web app',
+      'Kept client behavior aligned so mobile and web hit the same contracts and show the same state',
+      'Realtime features with persisted results across backend and clients',
+    ],
+    href: 'https://thravos.io',
+  },
+  {
     name: 'document-chat',
     description:
       'AI-powered document chat that answers questions from uploaded PDFs using semantic search and retrieval-augmented generation.',
@@ -41,21 +56,6 @@ export const repos: Repo[] = [
       'Secure auth, protected API routes, and encrypted file handling',
       'Modular, performance-focused architecture deployed on Vercel',
     ],
-  },
-  {
-    name: 'thravos-marketplace',
-    description:
-      'Marketplace and athlete engagement platform with subscription coaching, secure APIs, and high-concurrency frontend performance.',
-    language: 'JavaScript',
-    languageColor: '#f1e05a',
-    topics: ['react', 'nodejs', 'subscriptions', 'marketplace'],
-    private: true,
-    highlights: [
-      'Scalable marketplace and athlete engagement systems',
-      'Secure APIs for subscription-based coaching and recurring revenue',
-      'Reusable React architecture and frontend modernization',
-    ],
-    href: 'https://thravos.io',
   },
   {
     name: 'notification-system',
@@ -92,6 +92,7 @@ export type Role = {
   location: string
   period: string
   current?: boolean
+  summary?: string
   bullets: string[]
 }
 
@@ -103,12 +104,14 @@ export const experience: Role[] = [
     location: 'Remote',
     period: 'Feb 2025 – Present',
     current: true,
+    summary:
+      'Full-stack across Node/TypeScript APIs, React Native, and Next.js. Own API design and client integration, and keep mobile and web in sync when contracts change.',
     bullets: [
-      'Developing scalable marketplace and athlete engagement systems using modern frontend frameworks and backend services.',
-      'Designing and integrating secure APIs for subscription-based coaching and recurring revenue workflows.',
-      'Building responsive, performance-focused user experiences optimized for high-concurrency usage.',
-      'Contributing to frontend modernization through reusable React architecture and API integration.',
-      'Collaborating across product, engineering, and QA to improve feature delivery and platform stability.',
+      'Designed and shipped APIs and the client flows that use them, keeping status in sync across clients.',
+      'Kept behavior aligned across the mobile app and the web app so both hit the same APIs and show the same state.',
+      'Added authorization and request validation so only the right users can create or manage resources.',
+      'Built backend and client support for realtime features, including live updates and persisting results.',
+      'Worked in a TypeScript/Node codebase (REST, MongoDB, auth) and updated mobile and web together whenever API contracts changed.',
     ],
   },
   {
@@ -142,56 +145,34 @@ export const experience: Role[] = [
 ]
 
 
+export const stack = [
+  { name: 'TypeScript', color: '#3178c6' },
+  { name: 'Node.js', color: '#3fb950' },
+  { name: 'React Native', color: '#61dafb' },
+  { name: 'Next.js', color: '#f0f6fc' },
+  { name: 'MongoDB', color: '#3fa037' },
+  { name: 'Stripe', color: '#635bff' },
+]
+
 export const skills = {
-  languages: [
-    { name: 'JavaScript', color: '#f1e05a', pct: 32 },
-    { name: 'TypeScript', color: '#3178c6', pct: 22 },
-    { name: 'HTML', color: '#e34c26', pct: 14 },
-    { name: 'CSS', color: '#563d7c', pct: 12 },
-    { name: 'Python', color: '#3572A5', pct: 12 },
-    { name: 'C++', color: '#f34b7d', pct: 8 },
-  ],
-  frameworks: [
-    'React',
-    'Next.js',
-    'Angular',
-    'Node.js',
-    'Tailwind CSS',
-    'LangChain',
-  ],
-  tools: [
-    'Git',
-    'GitHub',
-    'Postman',
-    'Jira',
-    'Figma',
-    'Mixpanel',
-    'Vercel',
-    'VS Code',
-  ],
-  data: ['MongoDB', 'Prisma', 'Vector embeddings'],
-  backend: [
-    'REST APIs',
-    'Secure API design',
-    'Authentication',
-    'Schema design',
-    'Protected routes',
-    'Subscription workflows',
-  ],
-  frontend: [
-    'Responsive UI',
-    'Performance optimization',
-    'Reusable React architecture',
-    'High-concurrency UX',
-  ],
-  ai: ['RAG', 'Semantic search', 'LangChain', 'Document Q&A'],
-  product: [
-    'Regression testing',
-    'Feature validation',
-    'API documentation',
-    'User stories',
-    'Sprint planning',
-    'QA workflows',
+  core: stack,
+  groups: [
+    {
+      title: 'Mobile',
+      items: ['React Native', 'Expo', 'Redux'],
+    },
+    {
+      title: 'Web',
+      items: ['React', 'Next.js', 'Angular'],
+    },
+    {
+      title: 'Backend',
+      items: ['Node.js', 'REST', 'Socket.IO', 'Stripe'],
+    },
+    {
+      title: 'Platform',
+      items: ['MongoDB', 'AWS'],
+    },
   ],
 }
 

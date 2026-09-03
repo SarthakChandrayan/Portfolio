@@ -1,16 +1,6 @@
 import { useEffect, useState } from 'react'
 import { TiltCard, useDesktopLayout } from './Motion'
-import { profile } from '../data/profile'
-
-const stack = [
-  { name: 'React', color: '#58a6ff' },
-  { name: 'Next.js', color: '#f0f6fc' },
-  { name: 'Angular', color: '#f85149' },
-  { name: 'Node.js', color: '#3fb950' },
-  { name: 'TypeScript', color: '#79c0ff' },
-  { name: 'Prisma', color: '#a371f7' },
-  { name: 'MongoDB', color: '#3fb950' },
-]
+import { profile, stack } from '../data/profile'
 
 export function ReadmeCard() {
   return (
@@ -65,8 +55,8 @@ function AboutCard() {
               style={{ background: lit ? '#3fb950' : '#f5f5f5' }}
             />
             <span>
-              Currently building marketplace, coaching, and athlete-engagement
-              systems at{' '}
+              Currently building across backend APIs and the mobile, web, and
+              admin apps at{' '}
               <span style={{ color: lit ? '#d2a8ff' : undefined }}>Thravos</span>
             </span>
           </li>
@@ -84,7 +74,14 @@ function AboutCard() {
               <span style={{ color: lit ? '#f85149' : undefined }}>Angular</span>
               ,{' '}
               <span style={{ color: lit ? '#3fb950' : undefined }}>Node.js</span>
-              , and high-performance frontend architecture
+              ,{' '}
+              <span style={{ color: lit ? '#79c0ff' : undefined }}>
+                TypeScript
+              </span>
+              , and{' '}
+              <span style={{ color: lit ? '#61dafb' : undefined }}>
+                React Native
+              </span>
             </span>
           </li>
           <li className="flex gap-2">

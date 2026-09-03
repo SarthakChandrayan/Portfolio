@@ -65,10 +65,10 @@ const topicColors: Record<string, string> = {
   rag: '#d2a8ff',
   vercel: '#f0f6fc',
   react: '#58a6ff',
+  'react-native': '#61dafb',
   nodejs: '#3fb950',
-  subscriptions: '#79c0ff',
-  marketplace: '#f0f6fc',
-  mongodb: '#3fb950',
+  stripe: '#635bff',
+  mongodb: '#3fa037',
   api: '#79c0ff',
   leaderboard: '#d2a8ff',
 }
