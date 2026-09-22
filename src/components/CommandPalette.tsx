@@ -103,7 +103,8 @@ export function CommandPalette({ open, onClose, onSelectTab }: Props) {
         icon: RepoIcon,
         run: () => {
           onSelectTab('repositories')
-          if (repo.href) window.open(repo.href, '_blank')
+          const link = repo.href ?? repo.github
+          if (link) window.open(link, '_blank')
         },
       })),
     ]

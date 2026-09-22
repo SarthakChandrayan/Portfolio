@@ -25,9 +25,43 @@ export type Repo = {
   private: boolean
   highlights: string[]
   href?: string
+  github?: string
+  logo?: string
 }
 
 export const repos: Repo[] = [
+  {
+    name: 'specforge',
+    description:
+      'Local AI planning assistant. Paste an engineering meeting transcript and get a traceable plan: decisions, requirements, tasks, risks, and implementation steps.',
+    language: 'Python',
+    languageColor: '#3572A5',
+    topics: ['fastapi', 'ollama', 'react'],
+    private: false,
+    github: 'https://github.com/SarthakChandrayan/SpecForge',
+    highlights: [
+      'FastAPI sends the transcript to a local Ollama model (Qwen 3 8B) and rejects output that fails Pydantic validation',
+      'The app assigns item IDs and drops links that do not point at something in the same record',
+      'Every kept claim still needs a transcript excerpt, and the React UI lets you jump between related items',
+    ],
+  },
+  {
+    name: 'shrt (url shortener)',
+    description:
+      'Authenticated link shortener with expiring links and click analytics, on Neon Postgres with a React dashboard.',
+    language: 'TypeScript',
+    languageColor: '#3178c6',
+    topics: ['express', 'prisma', 'neon'],
+    private: false,
+    href: 'https://shrt.sarthakchandrayan.com/',
+    github: 'https://github.com/SarthakChandrayan/SHRT---URL-shortener',
+    logo: '/shrt-logo.png',
+    highlights: [
+      'Express API issues short codes, enforces expiration, and redirects while recording each click',
+      'Click breakdowns for device, browser, OS, referrer, and country, plus a clicks-over-time chart',
+      'Neon Auth JWTs protect the API, and each user manages their own links from the dashboard',
+    ],
+  },
   {
     name: 'thravos',
     description:

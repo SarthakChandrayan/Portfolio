@@ -2,6 +2,7 @@ import {
   ChevronDownIcon,
   LinkExternalIcon,
   LockIcon,
+  MarkGithubIcon,
   RepoIcon,
 } from '@primer/octicons-react'
 import { useState } from 'react'
@@ -46,7 +47,7 @@ export function PinnedRepos({
           </span>
         </div>
       )}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid items-start gap-4 md:grid-cols-2">
         {filtered.map((repo) => (
           <RepoCard key={repo.name} repo={repo} />
         ))}
@@ -71,6 +72,21 @@ const topicColors: Record<string, string> = {
   mongodb: '#3fa037',
   api: '#79c0ff',
   leaderboard: '#d2a8ff',
+  fastapi: '#009688',
+  ollama: '#d2a8ff',
+  express: '#68a063',
+  neon: '#00e599',
+}
+
+function RepoTitle({ name }: { name: string }) {
+  const match = name.match(/^(.*?)(\s*\(.*\))$/)
+  if (!match) return name
+  return (
+    <>
+      {match[1]}
+      <span className="font-normal text-fg-muted">{match[2]}</span>
+    </>
+  )
 }
 
 function RepoCard({ repo }: { repo: Repo }) {
@@ -81,7 +97,7 @@ function RepoCard({ repo }: { repo: Repo }) {
   const lit = desktop ? hot : true
 
   return (
-    <TiltCard className="rounded-3xl border border-border bg-canvas-overlay/70">
+    <TiltCard className="h-fit self-start rounded-3xl border border-border bg-canvas-overlay/70">
       <article
         className="p-4"
         onMouseEnter={() => setHot(true)}
@@ -97,7 +113,13 @@ function RepoCard({ repo }: { repo: Repo }) {
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
-              {repo.private ? (
+              {repo.logo ? (
+                <img
+                  src={repo.logo}
+                  alt=""
+                  className="h-6 w-6 shrink-0 rounded-md object-cover"
+                />
+              ) : repo.private ? (
                 <span style={{ color: lit ? '#d29922' : '#9198a1' }}>
                   <LockIcon size={16} />
                 </span>
@@ -110,7 +132,7 @@ function RepoCard({ repo }: { repo: Repo }) {
                 className="truncate text-[15px] font-semibold"
                 style={{ color: lit ? '#58a6ff' : '#f0f6fc' }}
               >
-                {repo.name}
+                <RepoTitle name={repo.name} />
               </span>
             </div>
             <span
@@ -175,18 +197,35 @@ function RepoCard({ repo }: { repo: Repo }) {
               </span>
             )
           })}
-          {repo.href && (
-            <a
-              href={repo.href}
-              target="_blank"
-              rel="noreferrer"
-              className="ml-auto inline-flex items-center gap-1 no-underline"
-              style={{ color: lit ? '#3fb950' : '#9198a1' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <LinkExternalIcon size={12} />
-              Live
-            </a>
+          {(repo.github || repo.href) && (
+            <span className="ml-auto inline-flex items-center gap-3">
+              {repo.github && (
+                <a
+                  href={repo.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 no-underline"
+                  style={{ color: lit ? '#f0f6fc' : '#9198a1' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MarkGithubIcon size={12} />
+                  GitHub
+                </a>
+              )}
+              {repo.href && (
+                <a
+                  href={repo.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 no-underline"
+                  style={{ color: lit ? '#3fb950' : '#9198a1' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <LinkExternalIcon size={12} />
+                  Live
+                </a>
+              )}
+            </span>
           )}
         </div>
       </article>
