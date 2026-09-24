@@ -27,6 +27,8 @@ export type Repo = {
   href?: string
   github?: string
   logo?: string
+  /** Wide wordmark; rendered larger than the square project marks. */
+  wideLogo?: boolean
 }
 
 export const repos: Repo[] = [
@@ -71,6 +73,8 @@ export const repos: Repo[] = [
     topics: ['react', 'express', 'neon'],
     private: false,
     github: 'https://github.com/SarthakChandrayan/Pedit',
+    logo: '/PediT.png',
+    wideLogo: true,
     highlights: [
       'Edit text, highlight, underline, and strikethrough on the page, then export a new PDF with pdf-lib',
       'Draw freehand, lines, arrows, and shapes, insert images, and reorder, rotate, duplicate, or delete pages',

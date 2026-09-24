@@ -117,7 +117,11 @@ function RepoCard({ repo }: { repo: Repo }) {
                 <img
                   src={repo.logo}
                   alt=""
-                  className="h-6 w-6 shrink-0 rounded-md object-cover"
+                  className={
+                    repo.wideLogo
+                      ? 'h-6 w-auto shrink-0 object-contain object-left'
+                      : 'h-6 w-6 shrink-0 rounded-md object-cover'
+                  }
                 />
               ) : repo.private ? (
                 <span style={{ color: lit ? '#d29922' : '#9198a1' }}>
