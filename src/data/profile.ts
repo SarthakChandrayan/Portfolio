@@ -63,19 +63,19 @@ export const repos: Repo[] = [
     ],
   },
   {
-    name: 'thravos',
+    name: 'Pedit (pdf - editor)',
     description:
-      'Consumer fitness platform. Shared APIs consumed by the React Native app, Next.js web, and admin.',
+      'In-browser PDF editor for text edits, annotations, drawings, and page changes, with saved versions on Neon Postgres.',
     language: 'TypeScript',
     languageColor: '#3178c6',
-    topics: ['react-native', 'nextjs', 'nodejs', 'mongodb'],
-    private: true,
+    topics: ['react', 'express', 'neon'],
+    private: false,
+    github: 'https://github.com/SarthakChandrayan/Pedit',
     highlights: [
-      'Shared TypeScript/Node APIs used by the React Native app and Next.js web app',
-      'Kept client behavior aligned so mobile and web hit the same contracts and show the same state',
-      'Realtime features with persisted results across backend and clients',
+      'Edit text, highlight, underline, and strikethrough on the page, then export a new PDF with pdf-lib',
+      'Draw freehand, lines, arrows, and shapes, insert images, and reorder, rotate, duplicate, or delete pages',
+      'Express API stores uploaded PDFs and version history in Neon Postgres',
     ],
-    href: 'https://thravos.io',
   },
   {
     name: 'document-chat',
@@ -90,6 +90,21 @@ export const repos: Repo[] = [
       'Secure auth, protected API routes, and encrypted file handling',
       'Modular, performance-focused architecture deployed on Vercel',
     ],
+  },
+  {
+    name: 'thravos',
+    description:
+      'Consumer fitness platform. Shared APIs consumed by the React Native app, Next.js web, and admin.',
+    language: 'TypeScript',
+    languageColor: '#3178c6',
+    topics: ['react-native', 'nextjs', 'nodejs', 'mongodb'],
+    private: true,
+    highlights: [
+      'Shared TypeScript/Node APIs used by the React Native app and Next.js web app',
+      'Kept client behavior aligned so mobile and web hit the same contracts and show the same state',
+      'Realtime features with persisted results across backend and clients',
+    ],
+    href: 'https://thravos.io',
   },
   {
     name: 'notification-system',
