@@ -1,37 +1,7 @@
 import { LinkExternalIcon, MarkGithubIcon } from '@primer/octicons-react'
 import { useState, type CSSProperties } from 'react'
-import { experience, repos, skills, type Repo } from '../data/profile'
-
-const ALIASES: Record<string, string[]> = {
-  'Node.js': ['nodejs', 'express'],
-  PostgreSQL: ['neon', 'postgres'],
-}
-
-const norm = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '')
-const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-function projectsUsing(skill: string): Repo[] {
-  const keys = new Set([norm(skill), ...(ALIASES[skill] ?? [])])
-  const mention = new RegExp(`\\b${escape(skill)}\\b`, 'i')
-  return repos.filter(
-    (repo) =>
-      keys.has(norm(repo.language)) ||
-      repo.topics.some((topic) => keys.has(norm(topic))) ||
-      mention.test(repo.description),
-  )
-}
-
-const workText = experience
-  .flatMap((role) => [role.summary ?? '', ...role.bullets])
-  .join(' ')
-
-function usedAtWork(skill: string) {
-  const base = skill.replace(/\.js$/i, '')
-  return (
-    new RegExp(`\\b${escape(skill)}\\b`, 'i').test(workText) ||
-    new RegExp(`\\b${escape(base)}\\b`).test(workText)
-  )
-}
+import { skills, type Repo } from '../data/profile'
+import { projectsUsing, usedAtWork } from '../lib/skills'
 
 const allSkills = [
   ...skills.core.map((item) => item.name),

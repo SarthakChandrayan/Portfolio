@@ -1,13 +1,17 @@
 import {
   Fragment,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
 } from 'react'
+import { PlayIcon } from '@primer/octicons-react'
 import { TiltCard, useDesktopLayout } from './Motion'
 import { experience, profile, repos, stack } from '../data/profile'
+import { projectsUsing, usedAtWork } from '../lib/skills'
 import { copyText } from '../lib/toast'
 
 export function ReadmeCard() {
@@ -23,6 +27,15 @@ function AboutCard() {
   const [hot, setHot] = useState(false)
   const desktop = useDesktopLayout()
   const lit = desktop ? hot : true
+  const textRef = useRef<HTMLParagraphElement>(null)
+
+  const followLight = (e: MouseEvent) => {
+    const el = textRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty('--tx', `${e.clientX - r.left}px`)
+    el.style.setProperty('--ty', `${e.clientY - r.top}px`)
+  }
 
   return (
     <TiltCard tilt={false} className="rounded-3xl border border-border bg-canvas-overlay/80">
@@ -30,6 +43,7 @@ function AboutCard() {
         className="p-5 md:p-6"
         onMouseEnter={() => setHot(true)}
         onMouseLeave={() => setHot(false)}
+        onMouseMove={followLight}
       >
         <p
           className="font-mono text-[11px] tracking-widest uppercase"
@@ -41,7 +55,10 @@ function AboutCard() {
           Hi, I&apos;m{' '}
           <span style={{ color: lit ? '#58a6ff' : undefined }}>Sarthak</span>
         </h2>
-        <p className="mt-3 text-[15px] text-fg-muted">
+        <p
+          ref={textRef}
+          className={`flashlight mt-3 text-[15px] text-fg-muted ${desktop && hot ? 'is-on' : ''}`}
+        >
           <strong style={{ color: lit ? '#79c0ff' : '#f5f5f5' }}>
             {profile.title}
           </strong>{' '}
@@ -82,7 +99,10 @@ function AboutCard() {
               <Tech lit={lit} color="#61dafb">React Native</Tech> on the front;{' '}
               <Tech lit={lit} color="#3fb950">Node.js</Tech>,{' '}
               <Tech lit={lit} color="#68a063">Express</Tech>, and{' '}
-              <Tech lit={lit} color="#009688">Python/FastAPI</Tech> on the back;{' '}
+              <Tech lit={lit} color="#009688" skill="FastAPI">
+                Python/FastAPI
+              </Tech>{' '}
+              on the back;{' '}
               <Tech lit={lit} color="#336791">PostgreSQL</Tech> and{' '}
               <Tech lit={lit} color="#3fa037">MongoDB</Tech> underneath
             </span>
@@ -116,13 +136,101 @@ function AboutCard() {
 function Tech({
   lit,
   color,
+  skill,
   children,
 }: {
   lit: boolean
   color: string
-  children: ReactNode
+  skill?: string
+  children: string
 }) {
-  return <span style={{ color: lit ? color : undefined }}>{children}</span>
+  const [open, setOpen] = useState(false)
+  const name = skill ?? children
+  const used = open ? projectsUsing(name) : []
+  const atWork = open && usedAtWork(name)
+
+  return (
+    <span
+      className="relative inline-block cursor-help"
+      tabIndex={0}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+      onClick={() => setOpen((v) => !v)}
+    >
+      <span
+        className="underline decoration-white/20 decoration-dotted underline-offset-4"
+        style={{ color: lit ? color : undefined }}
+      >
+        {children}
+      </span>
+      {open && (
+        <span
+          role="tooltip"
+          className="fade-in absolute bottom-full left-1/2 z-30 block -translate-x-1/2 pb-2"
+        >
+          <span className="block w-max max-w-[260px] rounded-xl border border-border bg-black/95 p-2.5 text-left text-[12px] leading-normal text-fg-muted shadow-2xl backdrop-blur">
+            <span className="flex items-center gap-2 font-medium text-fg">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+              />
+              {name}
+              <span className="ml-auto pl-3 font-mono text-[11px] font-normal text-fg-subtle">
+                {used.length
+                  ? `${used.length} project${used.length > 1 ? 's' : ''}`
+                  : atWork
+                    ? 'at work'
+                    : 'no public project yet'}
+              </span>
+            </span>
+            {used.length > 0 && (
+              <span className="mt-2 flex flex-wrap gap-1">
+                {used.map((repo) => {
+                  const link = repo.href ?? repo.github
+                  const chip = (
+                    <>
+                      {repo.logo && !repo.wideLogo ? (
+                        <img src={repo.logo} alt="" className="h-3.5 w-3.5 rounded-sm" />
+                      ) : (
+                        <span
+                          className="h-1.5 w-1.5 rounded-full"
+                          style={{ background: repo.languageColor }}
+                        />
+                      )}
+                      {slug(repo.name)}
+                    </>
+                  )
+                  const chipClass =
+                    'inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-fg-muted no-underline'
+                  return link ? (
+                    <a
+                      key={repo.name}
+                      href={link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`${chipClass} transition hover:border-white/40 hover:text-fg hover:no-underline`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {chip}
+                    </a>
+                  ) : (
+                    <span key={repo.name} className={chipClass}>
+                      {chip}
+                    </span>
+                  )
+                })}
+              </span>
+            )}
+            {atWork && used.length > 0 && (
+              <span className="mt-1.5 block text-fg-subtle">also used at work</span>
+            )}
+          </span>
+        </span>
+      )}
+    </span>
+  )
 }
 
 type Paint = (lit: boolean) => ReactNode
@@ -463,45 +571,78 @@ function TerminalCard() {
   const inputRef = useRef<HTMLInputElement>(null)
   const history = useRef<string[]>([])
   const cursor = useRef(-1)
+  const [streaming, setStreaming] = useState<number | null>(null)
+  const [take, setTake] = useState(0)
   const running = intro < INTRO.length
 
   useEffect(() => {
+    void take
     if (intro >= INTRO.length) return
     const cmd = INTRO[intro]
     let i = 0
+    let id = 0
     let show = 0
-    let advance = 0
-    const id = window.setInterval(() => {
-      i += 1
-      setTyped(cmd.slice(0, i))
-      if (i < cmd.length) return
-      window.clearInterval(id)
-      show = window.setTimeout(() => {
-        setTyped('')
-        setLog((l) => [...l, entry(cmd, run(cmd).output)])
-      }, 220)
-      advance = window.setTimeout(() => setIntro((n) => n + 1), 1000)
-    }, 42)
+    const start = window.setTimeout(
+      () => {
+        id = window.setInterval(() => {
+          i += 1
+          setTyped(cmd.slice(0, i))
+          if (i < cmd.length) return
+          window.clearInterval(id)
+          show = window.setTimeout(() => {
+            const next = entry(cmd, run(cmd).output)
+            setTyped('')
+            setStreaming(next.id)
+            setLog((l) => [...l, next])
+          }, 380)
+        }, 105)
+      },
+      intro === 0 ? 500 : 850,
+    )
     return () => {
+      window.clearTimeout(start)
       window.clearInterval(id)
       window.clearTimeout(show)
-      window.clearTimeout(advance)
     }
-  }, [intro])
+  }, [intro, take])
+
+  const scrollToEnd = () => {
+    const body = bodyRef.current
+    if (body) body.scrollTop = body.scrollHeight
+  }
+
+  const finishStream = () => {
+    setStreaming(null)
+    setIntro((n) => n + 1)
+  }
 
   useEffect(() => {
     const body = bodyRef.current
     if (body) body.scrollTop = body.scrollHeight
-  }, [log, typed])
+  }, [log, typed, running, streaming])
 
   const focusInput = () => {
     if (window.getSelection()?.toString()) return
     if (running) {
       setLog(introLog())
       setTyped('')
+      setStreaming(null)
       setIntro(INTRO.length)
     }
     requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }))
+  }
+
+  const replay = () => {
+    setTyped('')
+    setStreaming(null)
+    if (reducedMotion()) {
+      setLog(introLog())
+      setIntro(INTRO.length)
+      return
+    }
+    setLog([])
+    setIntro(0)
+    setTake((t) => t + 1)
   }
 
   const submit = () => {
@@ -517,12 +658,7 @@ function TerminalCard() {
       return
     }
     if (result.action === 'replay') {
-      if (reducedMotion()) {
-        setLog(introLog())
-        return
-      }
-      setLog([])
-      setIntro(0)
+      replay()
       return
     }
     setLog((l) => [...l, entry(raw, result.output)].slice(-60))
@@ -606,6 +742,14 @@ function TerminalCard() {
         <span className="ml-2 font-mono text-[12px] text-fg-muted">
           sarthak — zsh
         </span>
+        <button
+          type="button"
+          onClick={replay}
+          className="-my-1.5 ml-auto inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-0.5 text-[12px] leading-5 text-fg-muted transition hover:border-fg-subtle hover:text-fg"
+        >
+          <PlayIcon size={12} />
+          Replay
+        </button>
       </div>
 
       <div
@@ -618,13 +762,19 @@ function TerminalCard() {
             <PromptLine text={item.cmd} hot={lit} />
             {item.output && (
               <div className="mt-1 break-words text-fg-muted">
-                {item.output(lit)}
+                {item.id === streaming ? (
+                  <Typewriter onType={scrollToEnd} onDone={finishStream}>
+                    {item.output(lit)}
+                  </Typewriter>
+                ) : (
+                  item.output(lit)
+                )}
               </div>
             )}
           </div>
         ))}
 
-        {running ? (
+        {streaming !== null ? null : running ? (
           <PromptLine text={typed} caret hot={lit} />
         ) : (
           <div>
@@ -666,6 +816,68 @@ function TerminalCard() {
       </div>
     </article>
   )
+}
+
+function Typewriter({
+  children,
+  onType,
+  onDone,
+}: {
+  children: ReactNode
+  onType: () => void
+  onDone: () => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const handlers = useRef({ onType, onDone })
+
+  useLayoutEffect(() => {
+    handlers.current = { onType, onDone }
+  })
+
+  useLayoutEffect(() => {
+    const root = ref.current
+    if (!root) return
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    const parts: { node: Text; full: string }[] = []
+    while (walker.nextNode()) {
+      const node = walker.currentNode as Text
+      parts.push({ node, full: node.data })
+      node.data = ''
+    }
+
+    const caret = document.createElement('span')
+    caret.className = 'caret ml-0.5 inline-block w-[7px] align-middle'
+    caret.style.background = '#3fb950'
+    caret.textContent = '\u00a0'
+
+    let part = 0
+    let char = 0
+    const id = window.setInterval(() => {
+      while (part < parts.length && char >= parts[part].full.length) {
+        part += 1
+        char = 0
+      }
+      if (part >= parts.length) {
+        window.clearInterval(id)
+        caret.remove()
+        handlers.current.onDone()
+        return
+      }
+      const { node, full } = parts[part]
+      char += 1
+      node.data = full.slice(0, char)
+      node.after(caret)
+      handlers.current.onType()
+    }, 36)
+
+    return () => {
+      window.clearInterval(id)
+      caret.remove()
+      for (const { node, full } of parts) node.data = full
+    }
+  }, [])
+
+  return <div ref={ref}>{children}</div>
 }
 
 function PromptLine({
