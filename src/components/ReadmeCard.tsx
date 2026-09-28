@@ -1,6 +1,14 @@
-import { useEffect, useState } from 'react'
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react'
 import { TiltCard, useDesktopLayout } from './Motion'
-import { profile, stack } from '../data/profile'
+import { experience, profile, repos, stack } from '../data/profile'
+import { copyText } from '../lib/toast'
 
 export function ReadmeCard() {
   return (
@@ -110,87 +118,470 @@ function AboutCard() {
   )
 }
 
-function TerminalCard() {
-  const [step, setStep] = useState(0)
-  const [typed, setTyped] = useState('')
-  const [hot, setHot] = useState(false)
-  const [stackHover, setStackHover] = useState<string | null>(null)
-  const desktop = useDesktopLayout()
-  const lit = desktop ? hot : true
+type Paint = (lit: boolean) => ReactNode
+type Entry = { id: number; cmd: string; output: Paint | null }
+type Result = {
+  output: Paint | null
+  effect?: () => void
+  action?: 'clear' | 'replay'
+}
 
-  const commands = [
-    {
-      q: 'whoami',
-      output: (
-        <>
-          <span style={{ color: lit ? '#3fb950' : undefined }}>
-            {profile.name}
-          </span>
-          {' — '}
-          <span style={{ color: lit ? '#79c0ff' : undefined }}>
-            {profile.title}
-          </span>
-          {' @ '}
-          <span style={{ color: lit ? '#d2a8ff' : undefined }}>
-            {profile.company}
-          </span>
-        </>
-      ),
-    },
-    {
-      q: 'cat focus.md',
-      output: (
-        <span style={{ color: lit ? '#a5d6ff' : undefined }}>
-          Scalable frontends · API-driven systems · clean architecture
+const INTRO = ['whoami', 'cat focus.md', 'ls stack']
+
+const HELP: [string, string][] = [
+  ['whoami', 'who is this'],
+  ['cat focus.md', 'what I care about'],
+  ['ls stack', 'tools I use'],
+  ['ls projects', 'things I have built'],
+  ['open <name>', 'open a project, github, or linkedin'],
+  ['experience', 'where I have worked'],
+  ['contact', 'copy my email'],
+  ['clear', 'clear the screen'],
+  ['replay', 'rerun the intro'],
+]
+
+const slug = (name: string) => name.split(' ')[0].toLowerCase()
+
+const COMPLETIONS = [
+  'help',
+  'whoami',
+  'cat focus.md',
+  'ls stack',
+  'ls projects',
+  'experience',
+  'contact',
+  'socials',
+  'date',
+  'clear',
+  'replay',
+  'sudo hire-me',
+  'open github',
+  'open linkedin',
+  ...repos
+    .filter((repo) => repo.href || repo.github)
+    .map((repo) => `open ${slug(repo.name)}`),
+]
+
+let nextId = 0
+const entry = (cmd: string, output: Paint | null): Entry => ({
+  id: nextId++,
+  cmd,
+  output,
+})
+
+const tint = (lit: boolean, color: string) => ({
+  color: lit ? color : undefined,
+})
+
+function commonPrefix(words: string[]) {
+  let prefix = words[0] ?? ''
+  for (const word of words) {
+    while (!word.startsWith(prefix)) prefix = prefix.slice(0, -1)
+  }
+  return prefix
+}
+
+function Link({ lit, href }: { lit: boolean; href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      style={tint(lit, '#58a6ff')}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {href.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+    </a>
+  )
+}
+
+function StackList({ lit }: { lit: boolean }) {
+  const [hover, setHover] = useState<string | null>(null)
+  return (
+    <span className="flex flex-wrap gap-x-3 gap-y-1">
+      {stack.map((item) => (
+        <span
+          key={item.name}
+          className="cursor-default"
+          style={{ color: hover === item.name || lit ? item.color : undefined }}
+          onMouseEnter={() => setHover(item.name)}
+          onMouseLeave={() => setHover(null)}
+        >
+          {item.name}
         </span>
-      ),
-    },
-    {
-      q: 'ls stack',
-      output: (
-        <span className="flex flex-wrap gap-x-3 gap-y-1">
-          {stack.map((item) => (
-            <span
-              key={item.name}
-              className="cursor-default"
-              style={{
-                color:
-                  stackHover === item.name || lit ? item.color : undefined,
-              }}
-              onMouseEnter={() => setStackHover(item.name)}
-              onMouseLeave={() => setStackHover(null)}
-            >
-              {item.name}
+      ))}
+    </span>
+  )
+}
+
+const text = (value: ReactNode): Result => ({ output: () => value })
+
+const projectsOutput: Paint = (lit) => (
+  <span className="block space-y-0.5">
+    {repos.map((repo) => {
+      const status = repo.href
+        ? ['live', '#3fb950']
+        : repo.github
+          ? ['source', '#a3a3a3']
+          : repo.private
+            ? ['private', '#d29922']
+            : ['no link', '#737373']
+      return (
+        <span key={repo.name} className="flex gap-3">
+          <span className="min-w-[21ch]" style={tint(lit, '#58a6ff')}>
+            {slug(repo.name)}
+          </span>
+          <span style={tint(lit, status[1])}>{status[0]}</span>
+        </span>
+      )
+    })}
+    <span className="block pt-1 text-fg-subtle">
+      try <span style={tint(lit, '#79c0ff')}>open pedit</span>
+    </span>
+  </span>
+)
+
+function run(raw: string): Result {
+  const [cmd = '', ...rest] = raw.trim().split(/\s+/)
+  const arg = rest.join(' ')
+
+  switch (cmd.toLowerCase()) {
+    case '':
+      return { output: null }
+
+    case 'help':
+      return {
+        output: (lit) => (
+          <span className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-0.5">
+            {HELP.map(([name, about]) => (
+              <Fragment key={name}>
+                <span style={tint(lit, '#79c0ff')}>{name}</span>
+                <span>{about}</span>
+              </Fragment>
+            ))}
+          </span>
+        ),
+      }
+
+    case 'whoami':
+      return {
+        output: (lit) => (
+          <>
+            <span style={tint(lit, '#3fb950')}>{profile.name}</span>
+            {' — '}
+            <span style={tint(lit, '#79c0ff')}>{profile.title}</span>
+            {' @ '}
+            <span style={tint(lit, '#d2a8ff')}>{profile.company}</span>
+          </>
+        ),
+      }
+
+    case 'cat':
+      if (arg === 'focus.md') {
+        return {
+          output: (lit) => (
+            <span style={tint(lit, '#a5d6ff')}>
+              Scalable frontends · API-driven systems · clean architecture ·
+              mobile + web in sync · performance · AI & RAG tooling
             </span>
-          ))}
-        </span>
-      ),
-    },
-  ]
+          ),
+        }
+      }
+      return text(`cat: ${arg || '?'}: No such file or directory`)
 
-  const current = commands[step]
+    case 'ls':
+      if (arg === 'stack') return { output: (lit) => <StackList lit={lit} /> }
+      if (arg === 'projects') return { output: projectsOutput }
+      if (!arg) {
+        return {
+          output: (lit) => (
+            <span className="flex gap-4">
+              <span style={tint(lit, '#79c0ff')}>stack/</span>
+              <span style={tint(lit, '#79c0ff')}>projects/</span>
+              <span>focus.md</span>
+            </span>
+          ),
+        }
+      }
+      return text(`ls: ${arg}: No such file or directory`)
+
+    case 'projects':
+      return { output: projectsOutput }
+
+    case 'open': {
+      const q = arg.toLowerCase()
+      if (!q) return text('usage: open <name>. try `ls projects`')
+      let url: string | undefined
+      if (q === 'github') url = profile.github
+      else if (q === 'linkedin') url = profile.linkedin
+      else {
+        const repo = repos.find((r) => slug(r.name).startsWith(q))
+        if (!repo) return text(`open: no project called "${arg}". try \`ls projects\``)
+        url = repo.href ?? repo.github
+        if (!url) return text(`${slug(repo.name)} has no public link yet`)
+      }
+      const target = url
+      return {
+        effect: () => window.open(target, '_blank', 'noopener'),
+        output: (lit) => (
+          <>
+            opening <Link lit={lit} href={target} />
+          </>
+        ),
+      }
+    }
+
+    case 'experience':
+      return {
+        output: (lit) => (
+          <span className="block space-y-0.5">
+            {experience.map((role) => (
+              <span key={role.period} className="block">
+                <span style={tint(lit, '#d2a8ff')}>{role.period}</span>
+                {'  '}
+                <span style={tint(lit, '#f0f6fc')}>{role.title}</span>
+                {' @ '}
+                {role.company}
+              </span>
+            ))}
+          </span>
+        ),
+      }
+
+    case 'contact':
+    case 'email':
+      return {
+        effect: () => void copyText(profile.email, 'Email copied'),
+        output: (lit) => (
+          <>
+            <span style={tint(lit, '#79c0ff')}>{profile.email}</span> copied to
+            clipboard
+          </>
+        ),
+      }
+
+    case 'socials':
+      return {
+        output: (lit) => (
+          <span className="block space-y-0.5">
+            <span className="block">
+              github <Link lit={lit} href={profile.github} />
+            </span>
+            <span className="block">
+              linkedin <Link lit={lit} href={profile.linkedin} />
+            </span>
+          </span>
+        ),
+      }
+
+    case 'date': {
+      const now = new Date().toString()
+      return text(now)
+    }
+
+    case 'echo':
+      return text(arg)
+
+    case 'clear':
+      return { output: null, action: 'clear' }
+
+    case 'replay':
+      return { output: null, action: 'replay' }
+
+    case 'sudo':
+      if (arg.includes('hire')) {
+        return {
+          effect: () => void copyText(profile.email, 'Email copied'),
+          output: (lit) => (
+            <span className="block">
+              <span className="block">[sudo] password for recruiter: ********</span>
+              <span className="block" style={tint(lit, '#3fb950')}>
+                access granted. email copied:{' '}
+                <span style={tint(lit, '#79c0ff')}>{profile.email}</span>
+              </span>
+            </span>
+          ),
+        }
+      }
+      return text(
+        'visitor is not in the sudoers file. This incident will be reported. (try sudo hire-me)',
+      )
+
+    case 'rm':
+      return text(
+        arg.includes('-rf')
+          ? 'nice try. this portfolio is load-bearing.'
+          : 'rm: permission denied',
+      )
+
+    case 'cd':
+      return text('cd: this is a one-page site. try `ls`')
+
+    case 'exit':
+      return text('there is no exit. only `help`.')
+
+    default:
+      return {
+        output: (lit) => (
+          <>
+            zsh: command not found:{' '}
+            <span style={tint(lit, '#f85149')}>{cmd}</span>. try{' '}
+            <span style={tint(lit, '#79c0ff')}>help</span>
+          </>
+        ),
+      }
+  }
+}
+
+const reducedMotion = () =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const introLog = () => INTRO.map((cmd) => entry(cmd, run(cmd).output))
+
+function TerminalCard() {
+  const [log, setLog] = useState<Entry[]>(() =>
+    reducedMotion() ? introLog() : [],
+  )
+  const [intro, setIntro] = useState(() =>
+    reducedMotion() ? INTRO.length : 0,
+  )
+  const [typed, setTyped] = useState('')
+  const [value, setValue] = useState('')
+  const [touched, setTouched] = useState(false)
+  const [hot, setHot] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const desktop = useDesktopLayout()
+  const lit = desktop ? hot || focused : true
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const history = useRef<string[]>([])
+  const cursor = useRef(-1)
+  const running = intro < INTRO.length
 
   useEffect(() => {
-    setTyped('')
+    if (intro >= INTRO.length) return
+    const cmd = INTRO[intro]
     let i = 0
+    let show = 0
+    let advance = 0
     const id = window.setInterval(() => {
       i += 1
-      setTyped(current.q.slice(0, i))
-      if (i >= current.q.length) window.clearInterval(id)
+      setTyped(cmd.slice(0, i))
+      if (i < cmd.length) return
+      window.clearInterval(id)
+      show = window.setTimeout(() => {
+        setTyped('')
+        setLog((l) => [...l, entry(cmd, run(cmd).output)])
+      }, 220)
+      advance = window.setTimeout(() => setIntro((n) => n + 1), 1000)
     }, 42)
-    return () => window.clearInterval(id)
-  }, [current.q, step])
+    return () => {
+      window.clearInterval(id)
+      window.clearTimeout(show)
+      window.clearTimeout(advance)
+    }
+  }, [intro])
 
-  const done = typed === current.q
+  useEffect(() => {
+    const body = bodyRef.current
+    if (body) body.scrollTop = body.scrollHeight
+  }, [log, typed])
+
+  const focusInput = () => {
+    if (window.getSelection()?.toString()) return
+    if (running) {
+      setLog(introLog())
+      setTyped('')
+      setIntro(INTRO.length)
+    }
+    requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }))
+  }
+
+  const submit = () => {
+    const raw = value
+    setValue('')
+    setTouched(true)
+    cursor.current = -1
+    if (raw.trim()) history.current.push(raw.trim())
+    const result = run(raw)
+    result.effect?.()
+    if (result.action === 'clear') {
+      setLog([])
+      return
+    }
+    if (result.action === 'replay') {
+      if (reducedMotion()) {
+        setLog(introLog())
+        return
+      }
+      setLog([])
+      setIntro(0)
+      return
+    }
+    setLog((l) => [...l, entry(raw, result.output)].slice(-60))
+  }
+
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      submit()
+      return
+    }
+
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      const past = history.current
+      if (!past.length) return
+      e.preventDefault()
+      const from = cursor.current === -1 ? past.length : cursor.current
+      const next = from + (e.key === 'ArrowUp' ? -1 : 1)
+      if (next >= past.length) {
+        cursor.current = -1
+        setValue('')
+        return
+      }
+      cursor.current = Math.max(0, next)
+      setValue(past[cursor.current])
+      return
+    }
+
+    if (e.key === 'Tab') {
+      const typedSoFar = value.trimStart().toLowerCase()
+      if (!typedSoFar) return
+      e.preventDefault()
+      const matches = COMPLETIONS.filter((c) => c.startsWith(typedSoFar))
+      if (!matches.length) return
+      const prefix = matches.length === 1 ? matches[0] : commonPrefix(matches)
+      if (prefix.length > typedSoFar.length) {
+        setValue(prefix)
+        return
+      }
+      setLog((l) => [
+        ...l,
+        entry(value, () => (
+          <span className="flex flex-wrap gap-x-4">
+            {matches.map((m) => (
+              <span key={m}>{m}</span>
+            ))}
+          </span>
+        )),
+      ])
+      return
+    }
+
+    if (e.key === 'l' && e.ctrlKey) {
+      e.preventDefault()
+      setLog([])
+      return
+    }
+
+    if (e.key === 'Escape') inputRef.current?.blur()
+  }
 
   return (
     <article
       className="overflow-hidden rounded-3xl border border-border bg-black"
       onMouseEnter={() => setHot(true)}
-      onMouseLeave={() => {
-        setHot(false)
-        setStackHover(null)
-      }}
+      onMouseLeave={() => setHot(false)}
     >
       <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
         <span
@@ -210,42 +601,60 @@ function TerminalCard() {
         </span>
       </div>
 
-      <div className="space-y-4 px-4 py-5 font-mono text-[13px] md:text-[14px]">
-        {commands.slice(0, step).map((item) => (
-          <div key={item.q}>
-            <PromptLine text={item.q} hot={lit} />
-            <p className="mt-1 text-fg-muted">{item.output}</p>
+      <div
+        ref={bodyRef}
+        onClick={focusInput}
+        className="gh-scrollbar max-h-[380px] cursor-text space-y-4 overflow-y-auto px-4 py-5 font-mono text-[13px] md:text-[14px]"
+      >
+        {log.map((item) => (
+          <div key={item.id}>
+            <PromptLine text={item.cmd} hot={lit} />
+            {item.output && (
+              <div className="mt-1 break-words text-fg-muted">
+                {item.output(lit)}
+              </div>
+            )}
           </div>
         ))}
 
-        <div>
+        {running ? (
           <PromptLine text={typed} caret hot={lit} />
-          {done && <p className="mt-1 text-fg-muted">{current.output}</p>}
-        </div>
-
-        {done && step < commands.length - 1 && (
-          <button
-            type="button"
-            onClick={() => setStep((s) => s + 1)}
-            className="rounded-full border border-border px-3 py-1 text-[12px] text-fg-muted"
-            style={lit ? { borderColor: '#3fb950', color: '#3fb950' } : undefined}
-          >
-            run next command →
-          </button>
-        )}
-
-        {done && step === commands.length - 1 && (
-          <button
-            type="button"
-            className="text-[12px] text-fg-muted"
-            style={lit ? { color: '#58a6ff' } : undefined}
-            onClick={() => {
-              setStep(0)
-              setTyped('')
-            }}
-          >
-            replay
-          </button>
+        ) : (
+          <div>
+            <p className="flex items-center">
+              <span style={{ color: '#3fb950' }}>➜</span>
+              <span
+                className="ml-[1ch]"
+                style={{ color: lit ? '#79c0ff' : '#8b949e' }}
+              >
+                ~
+              </span>
+              <input
+                ref={inputRef}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={onKeyDown}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                aria-label="Terminal command"
+                autoComplete="off"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className="ml-[1ch] min-w-0 flex-1 bg-transparent text-[16px] outline-none md:text-[14px]"
+                style={{
+                  color: lit ? '#d2a8ff' : '#f0f6fc',
+                  caretColor: '#3fb950',
+                }}
+              />
+            </p>
+            {!touched && (
+              <p className="mt-2 text-[12px] text-fg-subtle">
+                type <span style={tint(lit, '#79c0ff')}>help</span> · tab
+                completes · ↑ for history
+              </p>
+            )}
+          </div>
         )}
       </div>
     </article>

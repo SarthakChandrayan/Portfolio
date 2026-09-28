@@ -1,7 +1,13 @@
 import { MarkGithubIcon, SearchIcon } from '@primer/octicons-react'
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { profile, tabs, type TabId } from '../data/profile'
 import { Magnetic } from './Motion'
+
+function placeOver(el: HTMLElement | null, tab: HTMLElement | null | undefined) {
+  if (!el || !tab) return
+  el.style.transform = `translateX(${tab.offsetLeft}px)`
+  el.style.width = `${tab.offsetWidth}px`
+}
 
 type Props = {
   active: TabId
@@ -11,6 +17,43 @@ type Props = {
 
 export function TopNav({ active, onChange, onSearch }: Props) {
   const [hot, setHot] = useState<TabId | null>(null)
+  const navRef = useRef<HTMLElement>(null)
+  const pillRef = useRef<HTMLSpanElement>(null)
+  const ghostRef = useRef<HTMLSpanElement>(null)
+  const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement | null>>>({})
+
+  useLayoutEffect(() => {
+    const nav = navRef.current
+    const pill = pillRef.current
+    if (!nav || !pill) return
+    const sync = () => placeOver(pill, tabRefs.current[active])
+    sync()
+    const ready = requestAnimationFrame(() => pill.classList.add('is-ready'))
+    const ro = new ResizeObserver(sync)
+    ro.observe(nav)
+    return () => {
+      cancelAnimationFrame(ready)
+      ro.disconnect()
+    }
+  }, [active])
+
+  const showGhost = (id: TabId) => {
+    setHot(id)
+    const ghost = ghostRef.current
+    if (!ghost) return
+    if (!ghost.classList.contains('is-on')) {
+      placeOver(ghost, tabRefs.current[id])
+      void ghost.offsetWidth
+      ghost.classList.add('is-on')
+      return
+    }
+    placeOver(ghost, tabRefs.current[id])
+  }
+
+  const hideGhost = () => {
+    setHot(null)
+    ghostRef.current?.classList.remove('is-on')
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-black md:bg-black/80 md:backdrop-blur-xl">
@@ -29,22 +72,38 @@ export function TopNav({ active, onChange, onSearch }: Props) {
           </span>
         </button>
 
-        <nav className="ml-2 hidden items-center rounded-full border border-border bg-canvas-subtle p-1 lg:flex">
+        <nav
+          ref={navRef}
+          onMouseLeave={hideGhost}
+          className="relative ml-2 hidden items-center rounded-full border border-border bg-canvas-subtle p-1 lg:flex"
+        >
+          <span
+            ref={ghostRef}
+            aria-hidden
+            className="nav-ghost pointer-events-none absolute top-1 bottom-1 left-0 rounded-full bg-white/10"
+          />
+          <span
+            ref={pillRef}
+            aria-hidden
+            className="nav-pill pointer-events-none absolute top-1 bottom-1 left-0 rounded-full bg-white shadow-[0_0_24px_rgba(255,255,255,0.25)]"
+          />
           {tabs.map((tab) => {
             const isActive = tab.id === active
             const isHot = hot === tab.id
             return (
               <button
                 key={tab.id}
+                ref={(el) => {
+                  tabRefs.current[tab.id] = el
+                }}
                 type="button"
                 onClick={() => onChange(tab.id)}
-                onMouseEnter={() => setHot(tab.id)}
-                onMouseLeave={() => setHot(null)}
-                className={`rounded-full px-3 py-1.5 text-[13px] transition duration-150 ${
+                onMouseEnter={() => showGhost(tab.id)}
+                className={`relative z-10 rounded-full px-3 py-1.5 text-[13px] transition-colors duration-200 ${
                   isActive
-                    ? 'bg-white font-medium text-black'
+                    ? 'font-medium text-black'
                     : isHot
-                      ? '-translate-y-0.5 text-fg'
+                      ? 'text-fg'
                       : 'text-fg-muted'
                 }`}
               >

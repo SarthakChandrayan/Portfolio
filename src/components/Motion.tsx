@@ -2,6 +2,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type MouseEvent,
   type ReactNode,
 } from 'react'
@@ -57,10 +58,12 @@ export function CountUp({
 export function TiltCard({
   children,
   className = '',
+  style,
   tilt = true,
 }: {
   children: ReactNode
   className?: string
+  style?: CSSProperties
   tilt?: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -90,6 +93,7 @@ export function TiltCard({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       className={`tilt-card light-up ${className}`}
+      style={style}
     >
       {children}
     </div>
@@ -133,23 +137,89 @@ export function Magnetic({
 }
 
 export function Toaster() {
-  const [message, setMessage] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ id: number; text: string } | null>(null)
 
   useEffect(() => {
     let hide: number | undefined
+    let id = 0
     return subscribeToasts((next) => {
-      setMessage(next)
+      id += 1
+      setToast({ id, text: next })
       window.clearTimeout(hide)
-      hide = window.setTimeout(() => setMessage(null), 1800)
+      hide = window.setTimeout(() => setToast(null), 1800)
     })
   }, [])
 
-  if (!message) return null
+  if (!toast) return null
 
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-border bg-canvas-overlay px-4 py-2 text-[13px] text-fg shadow-2xl">
-      {message}
+    <div className="pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+      <div
+        key={toast.id}
+        className="toast-in flex items-center gap-2 rounded-full border border-border bg-canvas-overlay px-4 py-2 text-[13px] text-fg shadow-2xl"
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-[#3fb950] shadow-[0_0_8px_#3fb950]" />
+        {toast.text}
+      </div>
     </div>
+  )
+}
+
+const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#%&*+<>/'
+
+function scramble(
+  text: string,
+  setOut: (value: string) => void,
+  raf: { current: number },
+) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  cancelAnimationFrame(raf.current)
+  const start = performance.now()
+  const tick = (now: number) => {
+    const settled = Math.floor(((now - start) / 750) * text.length)
+    if (settled >= text.length) {
+      setOut(text)
+      return
+    }
+    setOut(
+      Array.from(text, (ch, i) =>
+        ch === ' ' || i < settled
+          ? ch
+          : GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+      ).join(''),
+    )
+    raf.current = requestAnimationFrame(tick)
+  }
+  raf.current = requestAnimationFrame(tick)
+}
+
+export function ScrambleText({
+  text,
+  className = '',
+}: {
+  text: string
+  className?: string
+}) {
+  const [out, setOut] = useState(text)
+  const raf = useRef(0)
+
+  useEffect(() => {
+    const frame = raf
+    scramble(text, setOut, frame)
+    return () => cancelAnimationFrame(frame.current)
+  }, [text])
+
+  return (
+    <span
+      className={`relative inline-block whitespace-nowrap ${className}`}
+      onMouseEnter={() => scramble(text, setOut, raf)}
+      aria-label={text}
+    >
+      <span className="invisible">{text}</span>
+      <span className="absolute inset-0" aria-hidden>
+        {out}
+      </span>
+    </span>
   )
 }
 

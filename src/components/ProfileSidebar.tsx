@@ -9,7 +9,7 @@ import {
 import { useEffect, useState } from 'react'
 import { profile } from '../data/profile'
 import { copyText } from '../lib/toast'
-import { Magnetic } from './Motion'
+import { Magnetic, ScrambleText } from './Motion'
 
 export function ProfileSidebar() {
   const now = useIstTime()
@@ -33,8 +33,8 @@ export function ProfileSidebar() {
         </div>
 
         <div className="mt-3 min-w-0 md:mt-5">
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-fg md:text-[26px]">
-            {profile.name}
+          <h1 className="cursor-default text-[24px] leading-tight font-semibold tracking-tight text-fg md:text-[26px]">
+            <ScrambleText text={profile.name} />
           </h1>
           <p className="font-mono text-[13px] text-fg-muted">
             @{profile.username}

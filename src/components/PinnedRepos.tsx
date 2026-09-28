@@ -5,7 +5,7 @@ import {
   MarkGithubIcon,
   RepoIcon,
 } from '@primer/octicons-react'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { repos, type Repo } from '../data/profile'
 import { TiltCard, useDesktopLayout } from './Motion'
 
@@ -47,9 +47,9 @@ export function PinnedRepos({
           </span>
         </div>
       )}
-      <div className="grid items-start gap-4 md:grid-cols-2">
-        {filtered.map((repo) => (
-          <RepoCard key={repo.name} repo={repo} />
+      <div className="grid gap-4 md:grid-cols-2">
+        {filtered.map((repo, index) => (
+          <RepoCard key={repo.name} repo={repo} index={index} />
         ))}
         {filtered.length === 0 && (
           <p className="text-fg-muted">No projects matched that search.</p>
@@ -89,7 +89,7 @@ function RepoTitle({ name }: { name: string }) {
   )
 }
 
-function RepoCard({ repo }: { repo: Repo }) {
+function RepoCard({ repo, index }: { repo: Repo; index: number }) {
   const [open, setOpen] = useState(false)
   const [hot, setHot] = useState(false)
   const [topicHover, setTopicHover] = useState<string | null>(null)
@@ -97,9 +97,12 @@ function RepoCard({ repo }: { repo: Repo }) {
   const lit = desktop ? hot : true
 
   return (
-    <TiltCard className="h-fit self-start rounded-3xl border border-border bg-canvas-overlay/70">
+    <TiltCard
+      className="rise-in rounded-3xl border border-border bg-canvas-overlay/70"
+      style={{ '--i': index } as CSSProperties}
+    >
       <article
-        className="p-4"
+        className="flex h-full flex-col p-4"
         onMouseEnter={() => setHot(true)}
         onMouseLeave={() => {
           setHot(false)
@@ -156,21 +159,27 @@ function RepoCard({ repo }: { repo: Repo }) {
           <p className="mt-2 text-[13px] text-fg-muted">{repo.description}</p>
         </button>
 
-        {open && (
-          <ul className="mt-3 space-y-1.5 border-t border-border pt-3 text-[13px] text-fg">
-            {repo.highlights.map((item) => (
-              <li key={item} className="flex gap-2">
-                <span
-                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ background: lit ? '#3fb950' : '#f0f6fc' }}
-                />
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className={`expand ${open ? 'is-open' : ''}`} inert={!open}>
+          <div>
+            <ul className="stagger mt-3 space-y-1.5 border-t border-border pt-3 text-[13px] text-fg">
+              {repo.highlights.map((item, i) => (
+                <li
+                  key={item}
+                  className="flex gap-2"
+                  style={{ '--i': i } as CSSProperties}
+                >
+                  <span
+                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{ background: lit ? '#3fb950' : '#f0f6fc' }}
+                  />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-fg-muted">
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 text-[12px] text-fg-muted">
           <span className="inline-flex items-center gap-1">
             <span
               className="inline-block h-2.5 w-2.5 rounded-full"

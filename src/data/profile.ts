@@ -72,6 +72,7 @@ export const repos: Repo[] = [
     languageColor: '#3178c6',
     topics: ['react', 'express', 'neon'],
     private: false,
+    href: 'https://pedit.sarthakchandrayan.com/',
     github: 'https://github.com/SarthakChandrayan/Pedit',
     logo: '/PediT.png',
     wideLogo: true,
@@ -201,10 +202,19 @@ export const experience: Role[] = [
 export const stack = [
   { name: 'TypeScript', color: '#3178c6' },
   { name: 'Node.js', color: '#3fb950' },
+  { name: 'Express', color: '#68a063' },
+  { name: 'React', color: '#58a6ff' },
   { name: 'React Native', color: '#61dafb' },
   { name: 'Next.js', color: '#f0f6fc' },
+  { name: 'Angular', color: '#f85149' },
+  { name: 'Python', color: '#3572A5' },
+  { name: 'FastAPI', color: '#009688' },
+  { name: 'PostgreSQL', color: '#336791' },
+  { name: 'Prisma', color: '#5a67d8' },
   { name: 'MongoDB', color: '#3fa037' },
+  { name: 'Socket.IO', color: '#d2a8ff' },
   { name: 'Stripe', color: '#635bff' },
+  { name: 'AWS', color: '#ff9900' },
 ]
 
 export const skills = {
@@ -220,11 +230,15 @@ export const skills = {
     },
     {
       title: 'Backend',
-      items: ['Node.js', 'REST', 'Socket.IO', 'Stripe'],
+      items: ['Node.js', 'Express', 'Python', 'FastAPI', 'REST', 'Socket.IO', 'Stripe'],
+    },
+    {
+      title: 'Data',
+      items: ['PostgreSQL', 'Prisma', 'MongoDB'],
     },
     {
       title: 'Platform',
-      items: ['MongoDB', 'AWS'],
+      items: ['AWS', 'Neon', 'Vercel'],
     },
   ],
 }
