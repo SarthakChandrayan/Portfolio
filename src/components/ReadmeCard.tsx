@@ -54,7 +54,7 @@ function AboutCard() {
           >
             {profile.company}
           </a>
-          . {profile.bio} {profile.summary}
+          . {profile.summary}
         </p>
         <ul className="mt-4 space-y-2 text-[14px] text-fg">
           <li className="flex gap-2">
@@ -74,22 +74,17 @@ function AboutCard() {
               style={{ background: lit ? '#3fb950' : '#f5f5f5' }}
             />
             <span>
-              Focused on{' '}
-              <span style={{ color: lit ? '#58a6ff' : undefined }}>React</span>
-              ,{' '}
-              <span style={{ color: lit ? '#f0f6fc' : undefined }}>Next.js</span>
-              ,{' '}
-              <span style={{ color: lit ? '#f85149' : undefined }}>Angular</span>
-              ,{' '}
-              <span style={{ color: lit ? '#3fb950' : undefined }}>Node.js</span>
-              ,{' '}
-              <span style={{ color: lit ? '#79c0ff' : undefined }}>
-                TypeScript
-              </span>
-              , and{' '}
-              <span style={{ color: lit ? '#61dafb' : undefined }}>
-                React Native
-              </span>
+              Focused on end-to-end{' '}
+              <Tech lit={lit} color="#79c0ff">TypeScript</Tech>:{' '}
+              <Tech lit={lit} color="#58a6ff">React</Tech>,{' '}
+              <Tech lit={lit} color="#f0f6fc">Next.js</Tech>,{' '}
+              <Tech lit={lit} color="#f85149">Angular</Tech>, and{' '}
+              <Tech lit={lit} color="#61dafb">React Native</Tech> on the front;{' '}
+              <Tech lit={lit} color="#3fb950">Node.js</Tech>,{' '}
+              <Tech lit={lit} color="#68a063">Express</Tech>, and{' '}
+              <Tech lit={lit} color="#009688">Python/FastAPI</Tech> on the back;{' '}
+              <Tech lit={lit} color="#336791">PostgreSQL</Tech> and{' '}
+              <Tech lit={lit} color="#3fa037">MongoDB</Tech> underneath
             </span>
           </li>
           <li className="flex gap-2">
@@ -116,6 +111,18 @@ function AboutCard() {
       </div>
     </TiltCard>
   )
+}
+
+function Tech({
+  lit,
+  color,
+  children,
+}: {
+  lit: boolean
+  color: string
+  children: ReactNode
+}) {
+  return <span style={{ color: lit ? color : undefined }}>{children}</span>
 }
 
 type Paint = (lit: boolean) => ReactNode

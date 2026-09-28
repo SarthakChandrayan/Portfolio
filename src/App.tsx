@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { CommandPalette } from './components/CommandPalette'
 import { ContributionGraph } from './components/ContributionGraph'
 import { ExperiencePanel } from './components/ExperiencePanel'
@@ -67,23 +67,28 @@ export default function App() {
           <div className="flex flex-col gap-8 md:flex-row">
             <ProfileSidebar />
 
-            <div key={tab} className="tab-in min-w-0 flex-1 space-y-6">
-              {tab === 'overview' && (
-                <>
-                  <ContributionGraph
-                    data={contributions}
-                    loading={loading}
-                    live={live}
-                    error={error}
-                    onRetry={reload}
-                  />
-                  <ReadmeCard />
-                  <PinnedRepos />
-                </>
-              )}
-              {tab === 'repositories' && <RepositoriesPanel />}
-              {tab === 'experience' && <ExperiencePanel />}
-              {tab === 'skills' && <SkillsPanel />}
+            <div
+              className="page-in min-w-0 flex-1"
+              style={{ '--i': 1 } as CSSProperties}
+            >
+              <div key={tab} className="tab-in space-y-6">
+                {tab === 'overview' && (
+                  <>
+                    <ReadmeCard />
+                    <ContributionGraph
+                      data={contributions}
+                      loading={loading}
+                      live={live}
+                      error={error}
+                      onRetry={reload}
+                    />
+                    <PinnedRepos />
+                  </>
+                )}
+                {tab === 'repositories' && <RepositoriesPanel />}
+                {tab === 'experience' && <ExperiencePanel />}
+                {tab === 'skills' && <SkillsPanel />}
+              </div>
             </div>
           </div>
         </main>

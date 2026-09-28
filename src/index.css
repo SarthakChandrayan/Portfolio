@@ -341,6 +341,15 @@ a.btn-solid:hover {
     animation: tab-in 380ms ease both;
   }
 
+  .page-fade {
+    animation: fade-in 700ms ease both;
+  }
+
+  .page-in {
+    animation: rise-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 120ms + 80ms);
+  }
+
   .expand.is-open .stagger > *,
   .rise-in {
     animation: rise-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;

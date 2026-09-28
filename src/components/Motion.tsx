@@ -213,9 +213,11 @@ export function ScrambleText({
     <span
       className={`relative inline-block whitespace-nowrap ${className}`}
       onMouseEnter={() => scramble(text, setOut, raf)}
-      aria-label={text}
     >
-      <span className="invisible">{text}</span>
+      <span className="sr-only">{text}</span>
+      <span className="invisible" aria-hidden>
+        {text}
+      </span>
       <span className="absolute inset-0" aria-hidden>
         {out}
       </span>

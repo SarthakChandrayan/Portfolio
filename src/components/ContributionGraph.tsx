@@ -16,8 +16,10 @@ import {
 } from '../lib/github'
 import { HeatmapCanvas } from './HeatmapCanvas'
 import { CountUp, useDesktopLayout } from './Motion'
+import { Skyline } from './Skyline'
 
 type YearKey = 'last' | number
+type View = 'grid' | 'skyline'
 
 type Props = {
   data: ContributionPayload | null
@@ -47,6 +49,10 @@ export function ContributionGraph({
   const [replayKey, setReplayKey] = useState(0)
   const heatRef = useRef<HTMLDivElement>(null)
   const desktop = useDesktopLayout()
+  const [view, setView] = useState<View>(() =>
+    window.matchMedia('(min-width: 768px)').matches ? 'skyline' : 'grid',
+  )
+  const skyline = view === 'skyline'
   const light = useRef({ raf: 0, x: 0, y: 0, el: null as HTMLElement | null })
 
   const days = useMemo(() => {
@@ -131,6 +137,33 @@ export function ContributionGraph({
           ) : (
             <span className="text-[12px] text-fg-muted">Cached</span>
           )}
+          <div
+            role="group"
+            aria-label="Graph view"
+            className="relative inline-flex rounded-full border border-border p-0.5 text-[12px]"
+          >
+            <span
+              aria-hidden
+              className="absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%-2px)] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+              style={{ transform: skyline ? 'translateX(100%)' : 'none' }}
+            />
+            {(['grid', 'skyline'] as const).map((id) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={view === id}
+                onClick={() => {
+                  setView(id)
+                  setReplayKey((k) => k + 1)
+                }}
+                className={`relative z-10 w-12 rounded-full py-0.5 transition-colors duration-200 ${
+                  view === id ? 'font-medium text-black' : 'text-fg-muted hover:text-fg'
+                }`}
+              >
+                {id === 'grid' ? 'Grid' : '3D'}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             onClick={() => setReplayKey((k) => k + 1)}
@@ -162,7 +195,20 @@ export function ContributionGraph({
         ref={heatRef}
         className={`contrib-heatmap ${desktop ? '' : 'is-revealing'}`}
       >
-        {desktop ? (
+        {skyline ? (
+          <Skyline
+            weeks={weeks}
+            labels={labels}
+            loading={loading && !days.length}
+            selected={selected}
+            replayKey={replayKey}
+            alwaysLit={!desktop}
+            revealRoot={heatRef}
+            onSelect={(day) =>
+              setSelected((prev) => (prev?.date === day.date ? null : day))
+            }
+          />
+        ) : desktop ? (
           <div className="grid w-full grid-cols-[28px_minmax(0,1fr)] gap-x-2">
             <div />
             <div
@@ -236,10 +282,21 @@ export function ContributionGraph({
         )}
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[12px] text-fg-muted">
-          <p className="md:hidden">Swipe for earlier months · tap a day</p>
-          <p className="hidden md:block">
-            Sweep the graph to reveal GitHub greens · click a day to pin
-          </p>
+          {skyline ? (
+            <p>
+              <span className="md:hidden">Swipe sideways to rotate · tap a bar</span>
+              <span className="hidden md:inline">
+                Drag to rotate · hover for greens · click a bar to pin
+              </span>
+            </p>
+          ) : (
+            <>
+              <p className="md:hidden">Swipe for earlier months · tap a day</p>
+              <p className="hidden md:block">
+                Sweep the graph to reveal GitHub greens · click a day to pin
+              </p>
+            </>
+          )}
           <div className="flex items-center gap-1">
             Less
             <span className="legend-gray flex items-center gap-1">

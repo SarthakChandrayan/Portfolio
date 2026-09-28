@@ -15,7 +15,7 @@ export function ProfileSidebar() {
   const now = useIstTime()
 
   return (
-    <aside className="md:w-[280px] md:shrink-0">
+    <aside className="page-in md:w-[280px] md:shrink-0">
       <div className="flex flex-col items-center text-center md:block">
         <div className="relative w-[120px] shrink-0 md:mx-auto md:w-[196px]">
           <div className="relative p-[3px]">
