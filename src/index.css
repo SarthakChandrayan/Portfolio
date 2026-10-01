@@ -37,6 +37,38 @@ body,
   min-height: 100%;
 }
 
+/* Thin page scrollbar: a 6px pill on a transparent track. */
+html::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.14);
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.3);
+}
+
+html::-webkit-scrollbar-thumb:active {
+  background: #3fb950;
+}
+
+/* Firefox has no ::-webkit-scrollbar; Chromium would ignore the rules above if
+   these standard properties applied to it, so they're scoped to Firefox only. */
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+  }
+}
+
 body {
   margin: 0;
   background: #000;
@@ -890,23 +922,38 @@ a.btn-solid:hover {
   animation: blink 1s step-end infinite;
 }
 
+/* Inner scroll areas (terminal, search, project drawer): same thin pill as the page. */
 .gh-scrollbar::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 6px;
+  width: 6px;
 }
 
 .gh-scrollbar::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
-  border-radius: 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.14);
+}
+
+.gh-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.3);
+}
+
+.gh-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #3fb950;
 }
 
 .gh-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
+@supports not selector(::-webkit-scrollbar) {
+  .gh-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+  }
+}
+
 .graph-scroll {
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
 }
 
 @media (prefers-reduced-motion: reduce) {
