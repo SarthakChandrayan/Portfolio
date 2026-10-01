@@ -40,16 +40,11 @@ export function ExperiencePanel() {
   return (
     <div className="space-y-8">
       <section>
-        <div className="mb-4 flex items-baseline justify-between gap-3">
-          <h2 className="text-[18px] font-semibold tracking-tight text-fg">
-            Timeline
-          </h2>
-          {total && (
-            <span className="font-mono text-[12px] text-fg-muted">
-              {total} total
-            </span>
-          )}
-        </div>
+        {total && (
+          <p className="mb-4 font-mono text-[12px] text-fg-muted">
+            {total} of professional experience
+          </p>
+        )}
         <ol className="relative space-y-4 pl-6">
           <span
             aria-hidden

@@ -14,7 +14,6 @@ import {
   type ContributionDay,
   type ContributionPayload,
 } from '../lib/github'
-import { INTRO_DONE } from '../lib/intro'
 import { HeatmapCanvas } from './HeatmapCanvas'
 import { CountUp, useDesktopLayout } from './Motion'
 import { Skyline } from './Skyline'
@@ -56,11 +55,21 @@ export function ContributionGraph({
   const skyline = view === 'skyline'
   const light = useRef({ raf: 0, x: 0, y: 0, el: null as HTMLElement | null })
 
-  // Replay the graph build-up once the intro opens, so it happens on screen.
+  // Replay the graph build-up the first time it scrolls into view.
+  const sectionRef = useRef<HTMLElement>(null)
   useEffect(() => {
-    const replay = () => setReplayKey((k) => k + 1)
-    window.addEventListener(INTRO_DONE, replay)
-    return () => window.removeEventListener(INTRO_DONE, replay)
+    const el = sectionRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        setReplayKey((k) => k + 1)
+        io.disconnect()
+      },
+      { threshold: 0.35 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
   }, [])
 
   const days = useMemo(() => {
@@ -91,6 +100,7 @@ export function ContributionGraph({
 
   return (
     <section
+      ref={sectionRef}
       className="light-up overflow-hidden rounded-3xl border border-border bg-canvas-overlay/60 p-4 md:p-5"
       onMouseMove={(e) => {
         const t = e.currentTarget

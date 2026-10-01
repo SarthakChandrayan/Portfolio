@@ -314,10 +314,6 @@ a.btn-solid:hover {
     animation-delay: calc(var(--i, 0) * 2ms);
   }
 
-  .tab-in {
-    animation: tab-in 380ms ease both;
-  }
-
   .page-fade {
     animation: drop-in 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
@@ -327,26 +323,66 @@ a.btn-solid:hover {
     animation-delay: calc(var(--i, 0) * 140ms + 80ms);
   }
 
-  /* First load only: overview cards blur-rise in one after another. */
-  .site-enter .tab-in > * {
-    animation: enter 1000ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  /* Sections blur-rise in the first time they scroll into view. */
+  .reveal-body {
+    opacity: 0;
+    translate: 0 48px;
+    scale: 0.98;
+    filter: blur(14px);
+    transition:
+      opacity 900ms ease,
+      translate 1000ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      scale 1000ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      filter 900ms ease;
   }
-  .site-enter .tab-in > :nth-child(1) {
-    animation-delay: 220ms;
+
+  .reveal.is-visible .reveal-body {
+    opacity: 1;
+    translate: none;
+    scale: none;
+    filter: none;
   }
-  .site-enter .tab-in > :nth-child(2) {
-    animation-delay: 380ms;
+
+  .reveal .section-title {
+    clip-path: inset(0 0 100% 0);
+    translate: 0 0.35em;
+    transition:
+      clip-path 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms,
+      translate 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms;
   }
-  .site-enter .tab-in > :nth-child(3) {
-    animation-delay: 540ms;
+
+  .reveal.is-visible .section-title {
+    clip-path: inset(-10% -5% -20% -5%);
+    translate: none;
+  }
+
+  /* Anything animated inside a section waits until the section is revealed. */
+  .reveal:not(.is-visible) *,
+  .intro-playing .reveal * {
+    animation-play-state: paused !important;
   }
 
   /* Hold every entrance at its first frame until the intro opens. */
+  .intro-playing .reveal.is-visible .reveal-body {
+    opacity: 0;
+    translate: 0 48px;
+    scale: 0.98;
+    filter: blur(14px);
+  }
+
   .intro-playing .page-in,
   .intro-playing .page-fade,
-  .intro-playing .tab-in,
-  .intro-playing .tab-in > * {
+  .intro-playing .dock-in {
     animation-play-state: paused;
+  }
+
+  .dock-in {
+    animation: dock-up 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 350ms both;
+  }
+
+  .drawer-swap {
+    animation: rise-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 70ms + 140ms);
   }
 
   .expand.is-open .stagger > *,
@@ -391,6 +427,226 @@ a.btn-solid:hover {
     scale: none;
     filter: none;
   }
+}
+
+@keyframes dock-up {
+  from {
+    opacity: 0;
+    translate: 0 140%;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* ---------- Dock ---------- */
+
+.dock-item {
+  --s: 1;
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 0;
+  color: var(--color-fg-muted);
+  transition: color 200ms ease;
+}
+
+.dock-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 30px;
+  border-radius: 12px;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.dock-label {
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.dock-item.is-active {
+  color: var(--color-fg);
+}
+
+.dock-item.is-active .dock-icon {
+  background: rgb(255 255 255 / 0.12);
+}
+
+.dock-tip,
+.dock-dot {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dock {
+    height: 62px;
+    align-items: flex-end;
+  }
+
+  .dock-item {
+    flex: none;
+    width: calc(44px * var(--s));
+    height: calc(44px * var(--s));
+    padding: 0;
+    transition:
+      width 140ms ease-out,
+      height 140ms ease-out,
+      color 200ms ease;
+  }
+
+  .dock-icon {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgb(255 255 255 / 0.07);
+    border-radius: calc(13px * var(--s));
+    background: rgb(255 255 255 / 0.04);
+  }
+
+  .dock-icon svg {
+    scale: var(--s);
+    transition: scale 140ms ease-out;
+  }
+
+  .dock-item:hover .dock-icon {
+    background: rgb(255 255 255 / 0.1);
+    color: var(--color-fg);
+  }
+
+  .dock-item.is-active .dock-icon {
+    border-color: #fff;
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 24px rgb(255 255 255 / 0.25);
+  }
+
+  .dock-dot {
+    display: block;
+    position: absolute;
+    bottom: -6px;
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: #3fb950;
+    box-shadow: 0 0 6px #3fb950;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  .dock-item.is-active .dock-dot {
+    opacity: 1;
+  }
+
+  .dock-tip {
+    display: flex;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #111;
+    color: var(--color-fg);
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    translate: -50% 4px;
+    transition: opacity 150ms ease, translate 150ms ease;
+  }
+
+  .dock-tip kbd {
+    padding: 0 4px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    color: var(--color-fg-subtle);
+    font-family: var(--font-mono);
+    font-size: 10px;
+  }
+
+  .dock-item:hover .dock-tip,
+  .dock-item:focus-visible .dock-tip {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+/* ---------- Project drawer ---------- */
+
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.drawer.is-open {
+  pointer-events: auto;
+}
+
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.drawer.is-open .drawer-backdrop {
+  opacity: 1;
+}
+
+.drawer-panel {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 88svh;
+  border: 1px solid var(--color-border);
+  border-radius: 24px 24px 0 0;
+  background: #0a0a0a;
+  box-shadow: 0 -20px 80px rgb(0 0 0 / 0.8);
+  translate: 0 100%;
+  transition: translate 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.drawer.is-open .drawer-panel {
+  translate: none;
+}
+
+.drawer-grip {
+  width: 40px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: 2px;
+  background: #333;
+}
+
+@media (min-width: 768px) {
+  .drawer-panel {
+    inset: 12px 12px 12px auto;
+    width: min(560px, calc(100vw - 24px));
+    max-height: none;
+    border-radius: 24px;
+    box-shadow: -20px 0 80px rgb(0 0 0 / 0.8);
+    translate: calc(100% + 24px) 0;
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes drop-in {
@@ -624,17 +880,6 @@ a.btn-solid:hover {
   }
 }
 
-@keyframes tab-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @keyframes blink {
   50% {
     opacity: 0;
@@ -667,8 +912,7 @@ a.btn-solid:hover {
 @media (prefers-reduced-motion: reduce) {
   .avatar-ring,
   .caret,
-  .contrib-cell,
-  .tab-in {
+  .contrib-cell {
     animation: none !important;
   }
 

@@ -14,6 +14,10 @@ const TILT = 0.46
 const VERT = 0.9
 const YAW_LIMIT = (22 * Math.PI) / 180
 const BASE_YAW = (-14 * Math.PI) / 180
+// The idle sway runs for a while after the graph builds (or the pointer leaves),
+// then the canvas stops redrawing so an on-screen graph costs nothing while idle.
+const SWAY_MS = 6000
+const SWAY_AFTER_LEAVE_MS = 2500
 
 type Props = {
   weeks: WeekCell[][]
@@ -88,6 +92,10 @@ export function Skyline(props: Props) {
     let pointerIn = false
     let litMix = latest.current.alwaysLit ? 1 : 0
     let growStart = performance.now()
+    let swayUntil = growStart + SWAY_MS
+    // Sway phase advances only while swaying, so resuming never jumps.
+    let swayClock = 0
+    let lastFrame = 0
     let visible = true
     let raf = 0
     let bars: Bar[] = []
@@ -134,9 +142,12 @@ export function Skyline(props: Props) {
       const target = litTarget()
       litMix += (target - litMix) * 0.16
       if (Math.abs(target - litMix) < 0.01) litMix = target
-      if (!interacted && !reduced && !drag) {
-        yaw = BASE_YAW + Math.sin(now / 4200) * 0.1
+      const swaying = !interacted && !reduced && (pointerIn || now < swayUntil)
+      if (swaying && !drag) {
+        swayClock += Math.min(now - (lastFrame || now), 50)
+        yaw = BASE_YAW + Math.sin(swayClock / 4200) * 0.1
       }
+      lastFrame = now
 
       const cos = Math.cos(yaw)
       const sin = Math.sin(yaw)
@@ -254,7 +265,7 @@ export function Skyline(props: Props) {
 
       const busyAnimating =
         target !== litMix ||
-        (!interacted && !reduced) ||
+        swaying ||
         now - growStart < growFor
       if (visible && busyAnimating) draw()
     }
@@ -331,6 +342,7 @@ export function Skyline(props: Props) {
 
     const onLeave = () => {
       pointerIn = false
+      swayUntil = performance.now() + SWAY_AFTER_LEAVE_MS
       hover = null
       tip.style.opacity = '0'
       setReveal()
@@ -362,6 +374,7 @@ export function Skyline(props: Props) {
       draw,
       regrow: () => {
         growStart = performance.now()
+        swayUntil = growStart + SWAY_MS
         measure()
         draw()
       },

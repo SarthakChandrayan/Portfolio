@@ -1,7 +1,6 @@
 import {
   CopyIcon,
   DownloadIcon,
-  LinkIcon,
   LocationIcon,
   MailIcon,
   MarkGithubIcon,
@@ -10,13 +9,14 @@ import {
 import { useEffect, useState } from 'react'
 import { profile } from '../data/profile'
 import { copyText } from '../lib/toast'
+import { LinkedInIcon } from './LinkedInIcon'
 import { Magnetic, ScrambleText } from './Motion'
 
 export function ProfileSidebar() {
   const now = useIstTime()
 
   return (
-    <aside className="page-in md:w-[280px] md:shrink-0 md:self-start [@media(min-width:768px)_and_(min-height:820px)]:sticky [@media(min-width:768px)_and_(min-height:820px)]:top-24">
+    <aside className="page-in no-scrollbar md:sticky md:top-24 md:max-h-[calc(100svh-7rem)] md:w-[280px] md:shrink-0 md:self-start md:overflow-y-auto md:pb-24">
       <div className="flex flex-col items-center text-center md:block">
         <div className="relative w-[120px] shrink-0 md:mx-auto md:w-[196px]">
           <div className="relative p-[3px]">
@@ -74,7 +74,7 @@ export function ProfileSidebar() {
         </a>
       </div>
 
-      <ul className="mt-5 space-y-2.5 text-[13px] text-fg md:text-[13px]">
+      <ul className="mt-5 space-y-2.5 text-[13px] text-fg max-md:hidden">
         <li className="flex items-center gap-2">
           <OrganizationIcon size={16} className="text-fg-muted" />
           <a href={profile.companyUrl} target="_blank" rel="noreferrer">
@@ -104,7 +104,7 @@ export function ProfileSidebar() {
           </button>
         </li>
         <li className="flex items-center gap-2">
-          <LinkIcon size={16} className="text-fg-muted" />
+          <LinkedInIcon size={16} />
           <a href={profile.linkedin} target="_blank" rel="noreferrer">
             LinkedIn
           </a>

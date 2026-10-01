@@ -249,11 +249,19 @@ export const skills = {
   ],
 }
 
-export type TabId = 'overview' | 'repositories' | 'experience' | 'skills'
+export type SectionId =
+  | 'about'
+  | 'work'
+  | 'experience'
+  | 'skills'
+  | 'activity'
+  | 'contact'
 
-export const tabs: { id: TabId; label: string; count?: number }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'repositories', label: 'Work', count: repos.length },
+export const sections: { id: SectionId; label: string; count?: number }[] = [
+  { id: 'about', label: 'About' },
+  { id: 'work', label: 'Work', count: repos.length },
   { id: 'experience', label: 'Experience', count: experience.length },
   { id: 'skills', label: 'Skills' },
+  { id: 'activity', label: 'Activity' },
+  { id: 'contact', label: 'Contact' },
 ]

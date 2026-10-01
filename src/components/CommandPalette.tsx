@@ -1,24 +1,40 @@
 import {
-  BookIcon,
   BriefcaseIcon,
-  CodeIcon,
   CopyIcon,
   DownloadIcon,
+  GraphIcon,
+  KeyIcon,
   LinkExternalIcon,
+  MailIcon,
   MarkGithubIcon,
+  PersonIcon,
   RepoIcon,
   SearchIcon,
+  ToolsIcon,
   XIcon,
   type Icon,
 } from '@primer/octicons-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { profile, repos, type TabId } from '../data/profile'
+import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
+import { profile, repos, sections, type SectionId } from '../data/profile'
+import { repoStatus } from '../lib/repo'
 import { copyText } from '../lib/toast'
+import { LinkedInIcon } from './LinkedInIcon'
 
 type Props = {
   open: boolean
   onClose: () => void
-  onSelectTab: (id: TabId) => void
+  onNavigate: (id: SectionId) => void
+  onOpenProject: (index: number) => void
+  onShortcuts: () => void
+}
+
+const sectionIcons: Record<SectionId, Icon> = {
+  about: PersonIcon,
+  work: RepoIcon,
+  experience: BriefcaseIcon,
+  skills: ToolsIcon,
+  activity: GraphIcon,
+  contact: MailIcon,
 }
 
 type Action = {
@@ -26,7 +42,7 @@ type Action = {
   group: 'Navigate' | 'Projects' | 'Contact'
   label: string
   hint: string
-  icon: Icon
+  icon: Icon | ComponentType<{ size?: number; className?: string }>
   run: () => void
 }
 
@@ -76,7 +92,13 @@ function Highlight({ text, hits }: { text: string; hits: number[] }) {
   )
 }
 
-export function CommandPalette({ open, onClose, onSelectTab }: Props) {
+export function CommandPalette({
+  open,
+  onClose,
+  onNavigate,
+  onOpenProject,
+  onShortcuts,
+}: Props) {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -111,50 +133,32 @@ export function CommandPalette({ open, onClose, onSelectTab }: Props) {
 
   const actions = useMemo(() => {
     const base: Action[] = [
+      ...sections.map(
+        (section, n): Action => ({
+          id: section.id,
+          group: 'Navigate',
+          label: `Go to ${section.label}`,
+          hint: String(n + 1),
+          icon: sectionIcons[section.id],
+          run: () => onNavigate(section.id),
+        }),
+      ),
       {
-        id: 'overview',
+        id: 'shortcuts',
         group: 'Navigate',
-        label: 'Go to Overview',
-        hint: 'Tab',
-        icon: BookIcon,
-        run: () => onSelectTab('overview'),
-      },
-      {
-        id: 'repositories',
-        group: 'Navigate',
-        label: 'Go to Work',
-        hint: 'Tab',
-        icon: RepoIcon,
-        run: () => onSelectTab('repositories'),
-      },
-      {
-        id: 'experience',
-        group: 'Navigate',
-        label: 'Go to Experience',
-        hint: 'Tab',
-        icon: BriefcaseIcon,
-        run: () => onSelectTab('experience'),
-      },
-      {
-        id: 'skills',
-        group: 'Navigate',
-        label: 'Go to Skills',
-        hint: 'Tab',
-        icon: CodeIcon,
-        run: () => onSelectTab('skills'),
+        label: 'Show keyboard shortcuts',
+        hint: '?',
+        icon: KeyIcon,
+        run: onShortcuts,
       },
       ...repos.map(
-        (repo): Action => ({
+        (repo, index): Action => ({
           id: `repo-${repo.name}`,
           group: 'Projects',
           label: repo.name,
-          hint: repo.href ? 'Live' : repo.github ? 'GitHub' : repo.language,
+          hint: repoStatus(repo).label,
           icon: repo.href ? LinkExternalIcon : RepoIcon,
-          run: () => {
-            onSelectTab('repositories')
-            const link = repo.href ?? repo.github
-            if (link) window.open(link, '_blank')
-          },
+          run: () => onOpenProject(index),
         }),
       ),
       {
@@ -170,7 +174,7 @@ export function CommandPalette({ open, onClose, onSelectTab }: Props) {
         group: 'Contact',
         label: 'Open LinkedIn',
         hint: 'External',
-        icon: LinkExternalIcon,
+        icon: LinkedInIcon,
         run: () => window.open(profile.linkedin, '_blank'),
       },
       {
@@ -198,7 +202,7 @@ export function CommandPalette({ open, onClose, onSelectTab }: Props) {
         (item) => item.hits !== null || item.action.hint.toLowerCase().includes(q),
       )
       .map((item) => ({ action: item.action, hits: item.hits ?? [] }))
-  }, [onSelectTab, query])
+  }, [onNavigate, onOpenProject, onShortcuts, query])
 
   if (!open) return null
 
@@ -238,7 +242,7 @@ export function CommandPalette({ open, onClose, onSelectTab }: Props) {
                 runAt(active)
               }
             }}
-            placeholder="Search tabs, projects, contact…"
+            placeholder="Search sections, projects, contact…"
             spellCheck={false}
             autoComplete="off"
             className="h-12 flex-1 bg-transparent text-[16px] text-fg outline-none"

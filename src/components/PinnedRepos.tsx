@@ -1,5 +1,5 @@
 import {
-  ChevronDownIcon,
+  ArrowRightIcon,
   LinkExternalIcon,
   LockIcon,
   MarkGithubIcon,
@@ -7,78 +7,71 @@ import {
 } from '@primer/octicons-react'
 import { useState, type CSSProperties } from 'react'
 import { repos, type Repo } from '../data/profile'
+import { repoFilters, repoStatus, topicColors, type RepoFilter } from '../lib/repo'
 import { TiltCard, useDesktopLayout } from './Motion'
 
-type Props = {
-  query?: string
-  language?: string
-  compact?: boolean
-}
-
-export function PinnedRepos({
-  query = '',
-  language = 'all',
-  compact = false,
-}: Props) {
-  const filtered = repos.filter((repo) => {
-    const q = query.trim().toLowerCase()
-    const langOk = language === 'all' || repo.language === language
-    if (!langOk) return false
-    if (!q) return true
-    return (
-      repo.name.toLowerCase().includes(q) ||
-      repo.description.toLowerCase().includes(q) ||
-      repo.language.toLowerCase().includes(q) ||
-      repo.topics.some((t) => t.includes(q))
-    )
-  })
-
+export function ProjectFilters({
+  value,
+  onChange,
+}: {
+  value: RepoFilter
+  onChange: (value: RepoFilter) => void
+}) {
   return (
-    <section>
-      {!compact && (
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-[18px] font-semibold tracking-tight text-fg">
-            Featured work
-          </h2>
-          <span className="text-[12px] text-fg-muted">
-            {filtered.length} projects ·{' '}
-            <span className="md:hidden">tap a card</span>
-            <span className="hidden md:inline">click a card</span>
-          </span>
-        </div>
-      )}
-      <div className="grid gap-4 md:grid-cols-2">
-        {filtered.map((repo, index) => (
-          <RepoCard key={repo.name} repo={repo} index={index} />
-        ))}
-        {filtered.length === 0 && (
-          <p className="text-fg-muted">No projects matched that search.</p>
-        )}
-      </div>
-    </section>
+    <div role="group" aria-label="Filter projects" className="flex flex-wrap gap-1.5">
+      {repoFilters.map((filter) => {
+        const on = value === filter.id
+        const count = repos.filter(filter.test).length
+        return (
+          <button
+            key={filter.id}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(filter.id)}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] transition ${
+              on
+                ? 'border-white bg-white font-medium text-black'
+                : 'border-border text-fg-muted hover:border-white/40 hover:text-fg'
+            }`}
+          >
+            {filter.label}
+            <span className={`font-mono text-[11px] ${on ? 'text-black/45' : 'text-fg-subtle'}`}>
+              {count}
+            </span>
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
-const topicColors: Record<string, string> = {
-  nextjs: '#58a6ff',
-  langchain: '#a371f7',
-  prisma: '#3fb950',
-  rag: '#d2a8ff',
-  vercel: '#f0f6fc',
-  react: '#58a6ff',
-  'react-native': '#61dafb',
-  nodejs: '#3fb950',
-  stripe: '#635bff',
-  mongodb: '#3fa037',
-  api: '#79c0ff',
-  leaderboard: '#d2a8ff',
-  fastapi: '#009688',
-  ollama: '#d2a8ff',
-  express: '#68a063',
-  neon: '#00e599',
+export function PinnedRepos({
+  filter,
+  onOpen,
+}: {
+  filter: RepoFilter
+  onOpen: (index: number) => void
+}) {
+  const test = repoFilters.find((f) => f.id === filter)?.test ?? (() => true)
+  const shown = repos
+    .map((repo, index) => ({ repo, index }))
+    .filter(({ repo }) => test(repo))
+
+  return (
+    <div key={filter} className="grid gap-4 md:grid-cols-2">
+      {shown.map(({ repo, index }, order) => (
+        <RepoCard
+          key={repo.name}
+          repo={repo}
+          order={order}
+          onOpen={() => onOpen(index)}
+        />
+      ))}
+    </div>
+  )
 }
 
-function RepoTitle({ name }: { name: string }) {
+export function RepoTitle({ name }: { name: string }) {
   const match = name.match(/^(.*?)(\s*\(.*\))$/)
   if (!match) return name
   return (
@@ -89,97 +82,85 @@ function RepoTitle({ name }: { name: string }) {
   )
 }
 
-function RepoCard({ repo, index }: { repo: Repo; index: number }) {
-  const [open, setOpen] = useState(false)
+function RepoCard({
+  repo,
+  order,
+  onOpen,
+}: {
+  repo: Repo
+  order: number
+  onOpen: () => void
+}) {
   const [hot, setHot] = useState(false)
   const [topicHover, setTopicHover] = useState<string | null>(null)
   const desktop = useDesktopLayout()
   const lit = desktop ? hot : true
+  const status = repoStatus(repo)
 
   return (
     <TiltCard
-      className="rise-in rounded-3xl border border-border bg-canvas-overlay/70"
-      style={{ '--i': index } as CSSProperties}
+      className="rise-in group/card rounded-3xl border border-border bg-canvas-overlay/70 transition-colors hover:border-white/25"
+      style={{ '--i': order } as CSSProperties}
     >
       <article
-        className="flex h-full flex-col p-4"
+        className="relative flex h-full flex-col p-4"
         onMouseEnter={() => setHot(true)}
         onMouseLeave={() => {
           setHot(false)
           setTopicHover(null)
         }}
       >
+        {/* Whole-card hit area; the GitHub/Live links sit above it. */}
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="w-full text-left"
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              {repo.logo ? (
-                <img
-                  src={repo.logo}
-                  alt=""
-                  className={
-                    repo.wideLogo
-                      ? 'h-6 w-auto shrink-0 object-contain object-left'
-                      : 'h-6 w-6 shrink-0 rounded-md object-cover'
-                  }
-                />
-              ) : repo.private ? (
-                <span style={{ color: lit ? '#d29922' : '#9198a1' }}>
-                  <LockIcon size={16} />
-                </span>
-              ) : (
-                <span style={{ color: lit ? '#58a6ff' : '#9198a1' }}>
-                  <RepoIcon size={16} />
-                </span>
-              )}
-              <span
-                className="truncate text-[15px] font-semibold"
-                style={{ color: lit ? '#58a6ff' : '#f0f6fc' }}
-              >
-                <RepoTitle name={repo.name} />
-              </span>
-            </div>
-            <span
-              className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
-              style={{
-                borderColor: lit ? 'rgba(88,166,255,0.45)' : '#3d444d',
-                color: lit ? '#79c0ff' : '#9198a1',
-              }}
-            >
-              {repo.private ? 'Private' : 'Public'}
-              <ChevronDownIcon
-                size={12}
-                className={`transition ${open ? 'rotate-180' : ''}`}
+          onClick={onOpen}
+          className="absolute inset-0 z-0 rounded-3xl"
+          aria-label={`Open ${repo.name} details`}
+        />
+
+        <div className="pointer-events-none relative flex items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            {repo.logo ? (
+              <img
+                src={repo.logo}
+                alt=""
+                className={
+                  repo.wideLogo
+                    ? 'h-6 w-auto shrink-0 object-contain object-left'
+                    : 'h-6 w-6 shrink-0 rounded-md object-cover'
+                }
               />
+            ) : repo.private ? (
+              <span style={{ color: lit ? '#d29922' : '#9198a1' }}>
+                <LockIcon size={16} />
+              </span>
+            ) : (
+              <span style={{ color: lit ? '#58a6ff' : '#9198a1' }}>
+                <RepoIcon size={16} />
+              </span>
+            )}
+            <span
+              className="truncate text-[15px] font-semibold"
+              style={{ color: lit ? '#58a6ff' : '#f0f6fc' }}
+            >
+              <RepoTitle name={repo.name} />
             </span>
           </div>
-          <p className="mt-2 text-[13px] text-fg-muted">{repo.description}</p>
-        </button>
-
-        <div className={`expand ${open ? 'is-open' : ''}`} inert={!open}>
-          <div>
-            <ul className="stagger mt-3 space-y-1.5 border-t border-border pt-3 text-[13px] text-fg">
-              {repo.highlights.map((item, i) => (
-                <li
-                  key={item}
-                  className="flex gap-2"
-                  style={{ '--i': i } as CSSProperties}
-                >
-                  <span
-                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ background: lit ? '#3fb950' : '#f0f6fc' }}
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <span
+            className="shrink-0 rounded-full border px-2 py-0.5 text-[11px]"
+            style={{
+              borderColor: lit ? `${status.color}66` : '#3d444d',
+              color: lit ? status.color : '#9198a1',
+            }}
+          >
+            {status.label}
+          </span>
         </div>
+        <p className="pointer-events-none relative mt-2 text-[13px] text-fg-muted">
+          {repo.description}
+        </p>
 
-        <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 text-[12px] text-fg-muted">
+        <div className="pointer-events-none relative mt-auto flex flex-wrap items-center gap-2 pt-4 text-[12px] text-fg-muted">
           <span className="inline-flex items-center gap-1">
             <span
               className="inline-block h-2.5 w-2.5 rounded-full"
@@ -197,7 +178,8 @@ function RepoCard({ repo, index }: { repo: Repo; index: number }) {
             return (
               <span
                 key={topic}
-                className="rounded-full border px-2 py-0.5 text-[11px] font-medium"
+                className="pointer-events-auto cursor-pointer rounded-full border px-2 py-0.5 text-[11px] font-medium"
+                onClick={onOpen}
                 style={{
                   borderColor: on ? `${color}66` : 'rgba(255,255,255,0.15)',
                   background: on ? `${color}18` : 'rgba(255,255,255,0.05)',
@@ -210,36 +192,40 @@ function RepoCard({ repo, index }: { repo: Repo; index: number }) {
               </span>
             )
           })}
-          {(repo.github || repo.href) && (
-            <span className="ml-auto inline-flex items-center gap-3">
-              {repo.github && (
-                <a
-                  href={repo.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 no-underline"
-                  style={{ color: lit ? '#f0f6fc' : '#9198a1' }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MarkGithubIcon size={12} />
-                  GitHub
-                </a>
-              )}
-              {repo.href && (
-                <a
-                  href={repo.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 no-underline"
-                  style={{ color: lit ? '#3fb950' : '#9198a1' }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <LinkExternalIcon size={12} />
-                  Live
-                </a>
-              )}
+          <span className="ml-auto inline-flex items-center gap-3">
+            {repo.github && (
+              <a
+                href={repo.github}
+                target="_blank"
+                rel="noreferrer"
+                className="pointer-events-auto inline-flex items-center gap-1 no-underline"
+                style={{ color: lit ? '#f0f6fc' : '#9198a1' }}
+                aria-label={`${repo.name} on GitHub`}
+              >
+                <MarkGithubIcon size={12} />
+                <span className="max-sm:hidden">GitHub</span>
+              </a>
+            )}
+            {repo.href && (
+              <a
+                href={repo.href}
+                target="_blank"
+                rel="noreferrer"
+                className="pointer-events-auto inline-flex items-center gap-1 no-underline"
+                style={{ color: lit ? '#3fb950' : '#9198a1' }}
+                aria-label={`${repo.name} live site`}
+              >
+                <LinkExternalIcon size={12} />
+                <span className="max-sm:hidden">Live</span>
+              </a>
+            )}
+            <span
+              className="inline-flex items-center gap-1 text-fg transition-all md:translate-x-[-4px] md:opacity-0 md:group-hover/card:translate-x-0 md:group-hover/card:opacity-100"
+            >
+              Details
+              <ArrowRightIcon size={12} />
             </span>
-          )}
+          </span>
         </div>
       </article>
     </TiltCard>

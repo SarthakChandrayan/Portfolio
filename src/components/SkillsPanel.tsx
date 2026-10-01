@@ -22,10 +22,7 @@ export function SkillsPanel() {
 
   return (
     <section className="rounded-3xl border border-border bg-canvas-overlay/60 p-5 md:p-7">
-      <h2 className="text-[22px] font-semibold tracking-tight text-fg md:text-[26px]">
-        Stack
-      </h2>
-      <p className="mt-1 text-[14px] text-fg-muted">
+      <p className="text-[14px] text-fg-muted">
         TypeScript · Node · React · React Native · Next.js · Python · PostgreSQL · MongoDB
       </p>
       <p className="mt-1 text-[12px] text-fg-subtle">
