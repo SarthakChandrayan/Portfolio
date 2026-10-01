@@ -1,5 +1,6 @@
 import {
   CopyIcon,
+  DownloadIcon,
   LinkIcon,
   LocationIcon,
   MailIcon,
@@ -15,7 +16,7 @@ export function ProfileSidebar() {
   const now = useIstTime()
 
   return (
-    <aside className="page-in md:w-[280px] md:shrink-0">
+    <aside className="page-in md:w-[280px] md:shrink-0 md:self-start [@media(min-width:768px)_and_(min-height:820px)]:sticky [@media(min-width:768px)_and_(min-height:820px)]:top-24">
       <div className="flex flex-col items-center text-center md:block">
         <div className="relative w-[120px] shrink-0 md:mx-auto md:w-[196px]">
           <div className="relative p-[3px]">
@@ -29,7 +30,6 @@ export function ProfileSidebar() {
               className="avatar-photo aspect-square w-full rounded-full border border-canvas bg-canvas object-cover object-center"
             />
           </div>
-          <IstClock now={now} />
         </div>
 
         <div className="mt-3 min-w-0 md:mt-5">
@@ -54,14 +54,25 @@ export function ProfileSidebar() {
         </span>
       </div>
 
-      <Magnetic className="mt-4 block w-full">
+      <div className="mt-4 flex gap-2">
+        <Magnetic className="block flex-1">
+          <a
+            href={`mailto:${profile.email}`}
+            className="btn-solid flex h-10 items-center justify-center rounded-full bg-white text-[14px] font-semibold text-black no-underline hover:bg-neutral-200 hover:no-underline"
+          >
+            Get in touch
+          </a>
+        </Magnetic>
         <a
-          href={`mailto:${profile.email}`}
-          className="btn-solid flex h-10 items-center justify-center rounded-full bg-white text-[14px] font-semibold text-black no-underline hover:bg-neutral-200 hover:no-underline"
+          href={encodeURI(profile.resume)}
+          target="_blank"
+          rel="noreferrer"
+          className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-border px-4 text-[14px] font-medium text-fg no-underline transition hover:border-fg-subtle hover:bg-btn hover:no-underline"
         >
-          Get in touch
+          <DownloadIcon size={16} />
+          Résumé
         </a>
-      </Magnetic>
+      </div>
 
       <ul className="mt-5 space-y-2.5 text-[13px] text-fg md:text-[13px]">
         <li className="flex items-center gap-2">
@@ -120,19 +131,6 @@ function useIstTime() {
   return now
 }
 
-function istParts(now: Date) {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  }).formatToParts(now)
-  const num = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find((part) => part.type === type)?.value ?? 0)
-  return { h: num('hour'), m: num('minute'), s: num('second') }
-}
-
 function formatIst(now: Date) {
   return new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Kolkata',
@@ -142,40 +140,3 @@ function formatIst(now: Date) {
     hour12: false,
   }).format(now)
 }
-
-function IstClock({ now }: { now: Date }) {
-  const { h, m, s } = istParts(now)
-  const label = `Bengaluru time ${formatIst(now)} IST`
-
-  return (
-    <div
-      className="clock-face absolute right-1 bottom-1 h-8 w-8 rounded-full border border-border bg-canvas md:right-2 md:bottom-2 md:h-10 md:w-10"
-      title={label}
-      aria-label={label}
-    >
-      {[0, 90, 180, 270].map((deg) => (
-        <span
-          key={deg}
-          className="pointer-events-none absolute inset-0 flex justify-center"
-          style={{ transform: `rotate(${deg}deg)` }}
-        >
-          <span className="mt-[3px] h-[2px] w-[2px] rounded-full bg-fg-subtle md:mt-1" />
-        </span>
-      ))}
-      <span
-        className="clock-hand clock-hand-h"
-        style={{ transform: `rotate(${(h % 12) * 30 + m * 0.5}deg)` }}
-      />
-      <span
-        className="clock-hand clock-hand-m"
-        style={{ transform: `rotate(${m * 6 + s * 0.1}deg)` }}
-      />
-      <span
-        className="clock-hand clock-hand-s"
-        style={{ transform: `rotate(${s * 6}deg)` }}
-      />
-      <span className="clock-center" />
-    </div>
-  )
-}
-

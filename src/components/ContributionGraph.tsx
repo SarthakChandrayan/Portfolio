@@ -1,5 +1,5 @@
 import { PlayIcon, SyncIcon } from '@primer/octicons-react'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   contributionPhrase,
   formatCount,
@@ -14,6 +14,7 @@ import {
   type ContributionDay,
   type ContributionPayload,
 } from '../lib/github'
+import { INTRO_DONE } from '../lib/intro'
 import { HeatmapCanvas } from './HeatmapCanvas'
 import { CountUp, useDesktopLayout } from './Motion'
 import { Skyline } from './Skyline'
@@ -55,6 +56,13 @@ export function ContributionGraph({
   const skyline = view === 'skyline'
   const light = useRef({ raf: 0, x: 0, y: 0, el: null as HTMLElement | null })
 
+  // Replay the graph build-up once the intro opens, so it happens on screen.
+  useEffect(() => {
+    const replay = () => setReplayKey((k) => k + 1)
+    window.addEventListener(INTRO_DONE, replay)
+    return () => window.removeEventListener(INTRO_DONE, replay)
+  }, [])
+
   const days = useMemo(() => {
     if (!data) return []
     if (year === 'last') return lastYearDays(data.contributions)
@@ -74,6 +82,7 @@ export function ContributionGraph({
 
   const heading =
     year === 'last' ? 'contributions in the last year' : `contributions in ${year}`
+  const pending = !data
 
   const pickYear = (next: YearKey) => {
     setYear(next)
@@ -111,7 +120,17 @@ export function ContributionGraph({
             Live activity
           </p>
           <h2 className="text-[17px] font-semibold tracking-tight text-fg md:text-[20px]">
-            <CountUp value={total} /> {heading}
+            {pending ? (
+              error ? (
+                'Contributions unavailable right now'
+              ) : (
+                <span className="inline-block h-[1em] w-64 max-w-full animate-pulse rounded-md bg-white/10 align-middle" />
+              )
+            ) : (
+              <>
+                <CountUp key={replayKey} value={total} /> {heading}
+              </>
+            )}
           </h2>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -338,8 +357,8 @@ export function ContributionGraph({
       )}
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-[12px] sm:grid-cols-3">
-        <Stat label="Current streak" value={`${current}d`} />
-        <Stat label="Longest streak" value={`${longest}d`} />
+        <Stat label="Current streak" value={pending ? '—' : `${current}d`} />
+        <Stat label="Longest streak" value={pending ? '—' : `${longest}d`} />
         <Stat
           label="Best year"
           value={

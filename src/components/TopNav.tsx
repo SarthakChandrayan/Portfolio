@@ -152,12 +152,12 @@ export function TopNav({ active, onChange, onSearch }: Props) {
             alt={profile.name}
             width={64}
             height={64}
-            className="avatar-photo h-8 w-8 rounded-full border border-border object-cover object-center"
+            className="avatar-photo h-8 w-8 rounded-full border border-border object-cover object-center max-sm:!hidden"
           />
           <Magnetic>
             <a
               href={`mailto:${profile.email}`}
-              className="btn-solid hidden h-8 items-center rounded-full bg-white px-3 text-[13px] font-semibold text-black no-underline hover:bg-neutral-200 hover:no-underline sm:inline-flex"
+              className="btn-solid inline-flex h-8 items-center rounded-full bg-white px-3 text-[13px] font-semibold text-black no-underline hover:bg-neutral-200 hover:no-underline"
             >
               Hire me
             </a>

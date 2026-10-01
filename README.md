@@ -1,32 +1,28 @@
-# React + TypeScript + Vite
+# sarthak.dev
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Personal portfolio of **Sarthak Chandrayan**, Full-Stack Engineer at [Thravos](https://thravos.io).
 
-Currently, two official plugins are available:
+Styled after a GitHub profile: a live contribution graph (grid + 3D skyline), pinned projects, an interactive terminal, and a `⌘K` / `/` command palette.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- React 19 + TypeScript, built with Vite
+- Tailwind CSS v4
+- GitHub contributions fetched at runtime and cached in `localStorage`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it , see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Development
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # type-check + production build
+npm run lint     # oxlint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Editing content
+
+All profile copy, projects, experience, and skills live in [`src/data/profile.ts`](src/data/profile.ts).
+
+## Contact
+
+[sarthak.chandrayan396@gmail.com](mailto:sarthak.chandrayan396@gmail.com) · [LinkedIn](https://linkedin.com/in/sarthak-chandrayan-98a755159) · [GitHub](https://github.com/SarthakChandrayan)

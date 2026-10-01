@@ -80,9 +80,15 @@ function AboutCard() {
               style={{ background: lit ? '#3fb950' : '#f5f5f5' }}
             />
             <span>
-              Currently building across backend APIs and the mobile, web, and
-              admin apps at{' '}
+              At{' '}
               <span style={{ color: lit ? '#d2a8ff' : undefined }}>Thravos</span>
+              : <Tech lit={lit} color="#3fb950">Node.js</Tech> REST APIs on{' '}
+              <Tech lit={lit} color="#3fa037">MongoDB</Tech>, auth and request
+              validation, <Tech lit={lit} color="#635bff">Stripe</Tech> payments,
+              and realtime with{' '}
+              <Tech lit={lit} color="#d2a8ff">Socket.IO</Tech>, serving a{' '}
+              <Tech lit={lit} color="#61dafb">React Native</Tech> app and{' '}
+              <Tech lit={lit} color="#f0f6fc">Next.js</Tech> sites
             </span>
           </li>
           <li className="flex gap-2">
@@ -91,20 +97,15 @@ function AboutCard() {
               style={{ background: lit ? '#3fb950' : '#f5f5f5' }}
             />
             <span>
-              Focused on end-to-end{' '}
-              <Tech lit={lit} color="#79c0ff">TypeScript</Tech>:{' '}
-              <Tech lit={lit} color="#58a6ff">React</Tech>,{' '}
-              <Tech lit={lit} color="#f0f6fc">Next.js</Tech>,{' '}
-              <Tech lit={lit} color="#f85149">Angular</Tech>, and{' '}
-              <Tech lit={lit} color="#61dafb">React Native</Tech> on the front;{' '}
-              <Tech lit={lit} color="#3fb950">Node.js</Tech>,{' '}
-              <Tech lit={lit} color="#68a063">Express</Tech>, and{' '}
+              On my own: AI tools with{' '}
               <Tech lit={lit} color="#009688" skill="FastAPI">
                 Python/FastAPI
-              </Tech>{' '}
-              on the back;{' '}
-              <Tech lit={lit} color="#336791">PostgreSQL</Tech> and{' '}
-              <Tech lit={lit} color="#3fa037">MongoDB</Tech> underneath
+              </Tech>
+              , <Tech lit={lit} color="#79c0ff">LangChain</Tech>, and local
+              models via <Tech lit={lit} color="#f0f6fc">Ollama</Tech>, plus{' '}
+              <Tech lit={lit} color="#79c0ff">TypeScript</Tech> apps on{' '}
+              <Tech lit={lit} color="#336791">PostgreSQL</Tech> with{' '}
+              <Tech lit={lit} color="#5a67d8">Prisma</Tech>
             </span>
           </li>
           <li className="flex gap-2">
@@ -251,6 +252,7 @@ const HELP: [string, string][] = [
   ['open <name>', 'open a project, github, or linkedin'],
   ['experience', 'where I have worked'],
   ['contact', 'copy my email'],
+  ['resume', 'open my résumé'],
   ['clear', 'clear the screen'],
   ['replay', 'rerun the intro'],
 ]
@@ -265,6 +267,7 @@ const COMPLETIONS = [
   'ls projects',
   'experience',
   'contact',
+  'resume',
   'socials',
   'date',
   'clear',
@@ -475,6 +478,17 @@ function run(raw: string): Result {
         ),
       }
 
+    case 'resume':
+    case 'cv':
+      return {
+        effect: () => window.open(encodeURI(profile.resume), '_blank'),
+        output: (lit) => (
+          <>
+            opening <span style={tint(lit, '#79c0ff')}>resume.pdf</span>
+          </>
+        ),
+      }
+
     case 'socials':
       return {
         output: (lit) => (
@@ -554,11 +568,12 @@ const reducedMotion = () =>
 const introLog = () => INTRO.map((cmd) => entry(cmd, run(cmd).output))
 
 function TerminalCard() {
+  // The first intro command is pre-rendered so the card never opens empty.
   const [log, setLog] = useState<Entry[]>(() =>
-    reducedMotion() ? introLog() : [],
+    reducedMotion() ? introLog() : introLog().slice(0, 1),
   )
   const [intro, setIntro] = useState(() =>
-    reducedMotion() ? INTRO.length : 0,
+    reducedMotion() ? INTRO.length : 1,
   )
   const [typed, setTyped] = useState('')
   const [value, setValue] = useState('')

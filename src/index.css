@@ -268,63 +268,6 @@ a.btn-solid:hover {
   }
 }
 
-.clock-face {
-  position: relative;
-}
-
-.clock-hand {
-  position: absolute;
-  left: 50%;
-  bottom: 50%;
-  transform-origin: bottom center;
-  border-radius: 1px;
-  background: #fff;
-}
-
-.clock-hand-h {
-  width: 2px;
-  height: 7px;
-  margin-left: -1px;
-}
-
-.clock-hand-m {
-  width: 1.5px;
-  height: 10px;
-  margin-left: -0.75px;
-}
-
-.clock-hand-s {
-  width: 1px;
-  height: 11px;
-  margin-left: -0.5px;
-  background: #a3a3a3;
-}
-
-.clock-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 3px;
-  height: 3px;
-  margin: -1.5px 0 0 -1.5px;
-  border-radius: 999px;
-  background: #fff;
-}
-
-@media (min-width: 768px) {
-  .clock-hand-h {
-    height: 9px;
-  }
-
-  .clock-hand-m {
-    height: 13px;
-  }
-
-  .clock-hand-s {
-    height: 14px;
-  }
-}
-
 @property --ring {
   syntax: "<angle>";
   inherits: false;
@@ -376,12 +319,34 @@ a.btn-solid:hover {
   }
 
   .page-fade {
-    animation: fade-in 700ms ease both;
+    animation: drop-in 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .page-in {
-    animation: rise-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: calc(var(--i, 0) * 120ms + 80ms);
+    animation: enter 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 140ms + 80ms);
+  }
+
+  /* First load only: overview cards blur-rise in one after another. */
+  .site-enter .tab-in > * {
+    animation: enter 1000ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .site-enter .tab-in > :nth-child(1) {
+    animation-delay: 220ms;
+  }
+  .site-enter .tab-in > :nth-child(2) {
+    animation-delay: 380ms;
+  }
+  .site-enter .tab-in > :nth-child(3) {
+    animation-delay: 540ms;
+  }
+
+  /* Hold every entrance at its first frame until the intro opens. */
+  .intro-playing .page-in,
+  .intro-playing .page-fade,
+  .intro-playing .tab-in,
+  .intro-playing .tab-in > * {
+    animation-play-state: paused;
   }
 
   .expand.is-open .stagger > *,
@@ -410,6 +375,168 @@ a.btn-solid:hover {
 
   .toast-in {
     animation: toast-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.97;
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    translate: none;
+    scale: none;
+    filter: none;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    translate: 0 -100%;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* ---------- Intro ---------- */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  cursor: pointer;
+}
+
+.intro-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50.5%;
+  background:
+    radial-gradient(ellipse 60% 80% at 50% 100%, rgb(63 185 80 / 0.07), transparent 70%),
+    #000;
+  transition: translate 800ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.intro-panel-top {
+  top: 0;
+}
+
+.intro-panel-bottom {
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 50% 0%, rgb(63 185 80 / 0.07), transparent 70%),
+    #000;
+}
+
+.intro.is-split .intro-panel-top {
+  translate: 0 -100%;
+}
+
+.intro.is-split .intro-panel-bottom {
+  translate: 0 100%;
+}
+
+.intro-scan {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3fb950 20%, #b8f5c2 50%, #3fb950 80%, transparent);
+  box-shadow: 0 0 18px 2px rgb(63 185 80 / 0.55);
+  transform-origin: left;
+  scale: 0 1;
+  animation: intro-scan 400ms cubic-bezier(0.6, 0, 0.2, 1) 1280ms both;
+  transition: opacity 300ms ease;
+}
+
+.intro.is-split .intro-scan {
+  opacity: 0;
+}
+
+.intro-content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: intro-out 240ms ease 1500ms both;
+}
+
+.intro.is-split .intro-content {
+  animation: intro-out 200ms ease both;
+}
+
+.intro-line {
+  animation: intro-line 320ms ease both;
+  animation-delay: calc(var(--i, 0) * 200ms + 80ms);
+}
+
+.intro-letter {
+  display: inline-block;
+  animation: intro-letter 750ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 38ms + 220ms);
+}
+
+.intro-name {
+  animation: intro-glow 900ms ease 1000ms both;
+}
+
+@keyframes intro-letter {
+  from {
+    translate: 0 110%;
+    rotate: 8deg;
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    translate: none;
+    rotate: none;
+    opacity: 1;
+    filter: none;
+  }
+}
+
+@keyframes intro-line {
+  from {
+    opacity: 0;
+    translate: -6px 0;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@keyframes intro-glow {
+  0% {
+    text-shadow: none;
+  }
+  45% {
+    text-shadow: 0 0 28px rgb(63 185 80 / 0.65), 0 0 2px rgb(184 245 194 / 0.9);
+  }
+  100% {
+    text-shadow: 0 0 12px rgb(63 185 80 / 0.25);
+  }
+}
+
+@keyframes intro-scan {
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    scale: 1.04;
+    filter: blur(6px);
   }
 }
 

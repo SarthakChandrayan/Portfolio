@@ -205,9 +205,8 @@ export function ScrambleText({
 
   useEffect(() => {
     const frame = raf
-    scramble(text, setOut, frame)
     return () => cancelAnimationFrame(frame.current)
-  }, [text])
+  }, [])
 
   return (
     <span

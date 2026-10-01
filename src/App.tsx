@@ -1,7 +1,8 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useState, type CSSProperties } from 'react'
 import { CommandPalette } from './components/CommandPalette'
 import { ContributionGraph } from './components/ContributionGraph'
 import { ExperiencePanel } from './components/ExperiencePanel'
+import { Intro } from './components/Intro'
 import { Ambient, ScrollProgress, Toaster } from './components/Motion'
 import { PinnedRepos } from './components/PinnedRepos'
 import { ProfileSidebar } from './components/ProfileSidebar'
@@ -11,6 +12,7 @@ import { SkillsPanel } from './components/SkillsPanel'
 import { TopNav } from './components/TopNav'
 import { profile, tabs, type TabId } from './data/profile'
 import { useGithubData } from './hooks/useGithubData'
+import { shouldPlayIntro } from './lib/intro'
 
 function isTab(value: string): value is TabId {
   return tabs.some((tab) => tab.id === value)
@@ -20,15 +22,50 @@ export default function App() {
   const { contributions, loading, live, error, reload } = useGithubData()
   const [tab, setTab] = useState<TabId>('overview')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [intro] = useState(shouldPlayIntro)
+
+  // Entrance animations: held while the intro plays, and the first-load card
+  // stagger is dropped afterwards so later tab switches stay snappy.
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.classList.add('site-enter')
+    if (intro) root.classList.add('intro-playing')
+    if (intro) return
+    const id = window.setTimeout(() => root.classList.remove('site-enter'), 1800)
+    return () => window.clearTimeout(id)
+  }, [intro])
+
+  const onReveal = () => {
+    const root = document.documentElement
+    root.classList.remove('intro-playing')
+    window.setTimeout(() => root.classList.remove('site-enter'), 1800)
+  }
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1)
-    if (isTab(hash)) setTab(hash)
+    const syncFromHash = () => {
+      const hash = window.location.hash.slice(1)
+      if (isTab(hash)) setTab(hash)
+    }
+    syncFromHash()
+    window.addEventListener('hashchange', syncFromHash)
+    return () => window.removeEventListener('hashchange', syncFromHash)
   }, [])
 
   useEffect(() => {
     window.history.replaceState(null, '', `#${tab}`)
   }, [tab])
+
+  const selectTab = (next: TabId) => {
+    setTab(next)
+    if (window.scrollY > 0) {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'auto'
+          : 'smooth',
+      })
+    }
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -59,7 +96,7 @@ export default function App() {
       <div className="relative z-10">
         <TopNav
           active={tab}
-          onChange={setTab}
+          onChange={selectTab}
           onSearch={() => setSearchOpen(true)}
         />
 
@@ -126,9 +163,10 @@ export default function App() {
       <CommandPalette
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
-        onSelectTab={setTab}
+        onSelectTab={selectTab}
       />
       <Toaster />
+      {intro && <Intro onReveal={onReveal} />}
     </div>
   )
 }

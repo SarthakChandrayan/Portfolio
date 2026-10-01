@@ -3,6 +3,7 @@ import {
   BriefcaseIcon,
   CodeIcon,
   CopyIcon,
+  DownloadIcon,
   LinkExternalIcon,
   MarkGithubIcon,
   RepoIcon,
@@ -171,6 +172,14 @@ export function CommandPalette({ open, onClose, onSelectTab }: Props) {
         hint: 'External',
         icon: LinkExternalIcon,
         run: () => window.open(profile.linkedin, '_blank'),
+      },
+      {
+        id: 'resume',
+        group: 'Contact',
+        label: 'Open résumé (PDF)',
+        hint: 'Resume',
+        icon: DownloadIcon,
+        run: () => window.open(encodeURI(profile.resume), '_blank'),
       },
       {
         id: 'email',

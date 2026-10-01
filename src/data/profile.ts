@@ -11,9 +11,11 @@ export const profile = {
   linkedin: 'https://linkedin.com/in/sarthak-chandrayan-98a755159',
   github: `https://github.com/${GITHUB_USER}`,
   avatar: '/avatar-lg.jpg',
-  bio: 'Product-focused Full-Stack Engineer specializing in scalable web applications, high-performance frontend systems, and resilient backend integrations.',
+  resume: '/Sarthak Chandrayan Full Stack Engineer - Resume.pdf',
+  site: 'https://sarthakchandrayan.com',
+  bio: 'Full-Stack Engineer shipping production web and mobile apps in TypeScript, plus AI tools built on RAG and local LLMs.',
   summary:
-    'Experienced in building responsive user experiences, API-driven architectures, and modern full-stack platforms using React, Next.js, Angular, and Node.js. Passionate about performance optimization, clean system design, and delivering seamless digital experiences. Also work across TypeScript/Node APIs and the React Native, Next.js, and admin apps that consume them, keeping client behavior consistent when contracts change.',
+    'About two years shipping production web and mobile apps and the APIs behind them, end to end in TypeScript. Lately also building AI products with RAG, LangChain, and local LLMs.',
 }
 
 export type Repo = {
@@ -159,13 +161,13 @@ export const experience: Role[] = [
     period: 'Feb 2025 – Present',
     current: true,
     summary:
-      'Full-stack across Node/TypeScript APIs, React Native, and Next.js. Own API design and client integration, and keep mobile and web in sync when contracts change.',
+      'Full-stack across Node.js/TypeScript REST APIs, MongoDB, Stripe, React Native, and Next.js.',
     bullets: [
-      'Designed and shipped APIs and the client flows that use them, keeping status in sync across clients.',
-      'Kept behavior aligned across the mobile app and the web app so both hit the same APIs and show the same state.',
-      'Added authorization and request validation so only the right users can create or manage resources.',
-      'Built backend and client support for realtime features, including live updates and persisting results.',
-      'Worked in a TypeScript/Node codebase (REST, MongoDB, auth) and updated mobile and web together whenever API contracts changed.',
+      'Designed and shipped REST APIs and the client flows that use them, including Stripe payments, across the React Native app and the Next.js web apps.',
+      'Implemented authentication, authorization, and request validation across the API.',
+      'Built backend and client support for realtime features with Socket.IO: live updates during a session and persisted results when it ends.',
+      'Developed and maintained three production websites with Next.js and React, using Decap CMS for MDX content through a Git-based publishing workflow.',
+      'Coordinated API contract changes across web and mobile so both platforms stay consistent.',
     ],
   },
   {
@@ -175,7 +177,7 @@ export const experience: Role[] = [
     location: 'Remote',
     period: 'Aug 2024 – Jan 2025',
     bullets: [
-      'Owned QA testing workflows including regression testing, bug reporting, and feature validation.',
+      'Owned QA workflows covering regression testing, bug reporting, feature validation, and release verification.',
       'Managed Jira documentation and sprint tracking to streamline engineering workflows.',
       'Implemented backend logic for referral leaderboard and competition systems.',
       'Designed and developed the foundation of the notification system, including schema design and API integration.',
@@ -226,7 +228,7 @@ export const skills = {
     },
     {
       title: 'Web',
-      items: ['React', 'Next.js', 'Angular'],
+      items: ['React', 'Next.js', 'Angular', 'Tailwind CSS'],
     },
     {
       title: 'Backend',
@@ -235,6 +237,10 @@ export const skills = {
     {
       title: 'Data',
       items: ['PostgreSQL', 'Prisma', 'MongoDB'],
+    },
+    {
+      title: 'AI',
+      items: ['LangChain', 'RAG', 'Ollama'],
     },
     {
       title: 'Platform',
