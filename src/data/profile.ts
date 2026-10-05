@@ -35,7 +35,7 @@ export type Repo = {
 
 export const repos: Repo[] = [
   {
-    name: 'planar',
+    name: 'Planar (meeting analyzer)',
     description:
       'Local AI meeting analyzer. Paste an engineering meeting transcript and get a traceable record: decisions, requirements, tasks with owners and due dates, risks, open questions, and an implementation plan, each linked to the lines it came from.',
     language: 'Python',
