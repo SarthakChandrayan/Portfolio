@@ -43,8 +43,10 @@ export const repos: Repo[] = [
     topics: ['fastapi', 'ollama', 'react'],
     private: false,
     github: 'https://github.com/SarthakChandrayan/SpecForge',
+    logo: '/planar-logo.png',
+    wideLogo: true,
     highlights: [
-      'Runs qwen3:4b on a laptop CPU through Ollama: four narrow passes reuse the cached transcript prefix, and JSON-schema-constrained output means a long generation never fails to parse',
+      'Runs fully offline on whichever Ollama model you configure (defaults to qwen3:4b, sized for a laptop CPU): four narrow passes reuse the cached transcript prefix, and JSON-schema-constrained output means a long generation never fails to parse',
       'The model cites line numbers instead of quoting; the backend checks each cited line supports the claim, drops what it cannot ground, and keeps owners and due dates only if they appear in the transcript',
       'Links between items are inferred from shared evidence, not generated, and the app assigns every ID',
       'Runs go to a background worker that survives a closed tab or restart, with time estimates that learn from past runs and a Markdown export',
