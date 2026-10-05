@@ -35,18 +35,19 @@ export type Repo = {
 
 export const repos: Repo[] = [
   {
-    name: 'specforge',
+    name: 'planar',
     description:
-      'Local AI planning assistant. Paste an engineering meeting transcript and get a traceable plan: decisions, requirements, tasks, risks, and implementation steps.',
+      'Local AI meeting analyzer. Paste an engineering meeting transcript and get a traceable record: decisions, requirements, tasks with owners and due dates, risks, open questions, and an implementation plan, each linked to the lines it came from.',
     language: 'Python',
     languageColor: '#3572A5',
     topics: ['fastapi', 'ollama', 'react'],
     private: false,
     github: 'https://github.com/SarthakChandrayan/SpecForge',
     highlights: [
-      'FastAPI sends the transcript to a local Ollama model (Qwen 3 8B) and rejects output that fails Pydantic validation',
-      'The app assigns item IDs and drops links that do not point at something in the same record',
-      'Every kept claim still needs a transcript excerpt, and the React UI lets you jump between related items',
+      'Runs qwen3:4b on a laptop CPU through Ollama: four narrow passes reuse the cached transcript prefix, and JSON-schema-constrained output means a long generation never fails to parse',
+      'The model cites line numbers instead of quoting; the backend checks each cited line supports the claim, drops what it cannot ground, and keeps owners and due dates only if they appear in the transcript',
+      'Links between items are inferred from shared evidence, not generated, and the app assigns every ID',
+      'Runs go to a background worker that survives a closed tab or restart, with time estimates that learn from past runs and a Markdown export',
     ],
   },
   {
