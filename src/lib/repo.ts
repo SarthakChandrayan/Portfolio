@@ -17,6 +17,10 @@ export const topicColors: Record<string, string> = {
   ollama: '#d2a8ff',
   express: '#68a063',
   neon: '#00e599',
+  flask: '#f0f6fc',
+  sqlite: '#58a6ff',
+  ocr: '#ff7b54',
+  fastembed: '#d2a8ff',
 }
 
 export type RepoFilter = 'all' | 'live' | 'source' | 'client'

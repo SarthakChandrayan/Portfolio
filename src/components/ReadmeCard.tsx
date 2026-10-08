@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { PlayIcon } from '@primer/octicons-react'
 import { TiltCard, useDesktopLayout } from './Motion'
-import { experience, profile, repos, stack } from '../data/profile'
+import { experience, profile, repos, stack, type Repo } from '../data/profile'
 import { projectsUsing, usedAtWork } from '../lib/skills'
 import { copyText } from '../lib/toast'
 
@@ -200,7 +200,7 @@ function Tech({
                           style={{ background: repo.languageColor }}
                         />
                       )}
-                      {slug(repo.name)}
+                      {slug(repo)}
                     </>
                   )
                   const chipClass =
@@ -257,7 +257,7 @@ const HELP: [string, string][] = [
   ['replay', 'rerun the intro'],
 ]
 
-const slug = (name: string) => name.split(' ')[0].toLowerCase()
+const slug = (repo: Repo) => repo.slug ?? repo.name.split(' ')[0].toLowerCase()
 
 const COMPLETIONS = [
   'help',
@@ -277,7 +277,7 @@ const COMPLETIONS = [
   'open linkedin',
   ...repos
     .filter((repo) => repo.href || repo.github)
-    .map((repo) => `open ${slug(repo.name)}`),
+    .map((repo) => `open ${slug(repo)}`),
 ]
 
 let nextId = 0
@@ -347,7 +347,7 @@ const projectsOutput: Paint = (lit) => (
       return (
         <span key={repo.name} className="flex gap-3">
           <span className="min-w-[21ch]" style={tint(lit, '#58a6ff')}>
-            {slug(repo.name)}
+            {slug(repo)}
           </span>
           <span style={tint(lit, status[1])}>{status[0]}</span>
         </span>
@@ -433,10 +433,10 @@ function run(raw: string): Result {
       if (q === 'github') url = profile.github
       else if (q === 'linkedin') url = profile.linkedin
       else {
-        const repo = repos.find((r) => slug(r.name).startsWith(q))
+        const repo = repos.find((r) => slug(r).startsWith(q))
         if (!repo) return text(`open: no project called "${arg}". try \`ls projects\``)
         url = repo.href ?? repo.github
-        if (!url) return text(`${slug(repo.name)} has no public link yet`)
+        if (!url) return text(`${slug(repo)} has no public link yet`)
       }
       const target = url
       return {

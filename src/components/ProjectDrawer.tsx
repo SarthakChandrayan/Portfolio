@@ -1,6 +1,7 @@
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
+  DownloadIcon,
   LinkExternalIcon,
   LockIcon,
   MarkGithubIcon,
@@ -175,6 +176,15 @@ export function ProjectDrawer({ open, index, onClose, onIndex }: Props) {
               >
                 <LinkExternalIcon size={16} />
                 Visit live site
+              </a>
+            )}
+            {repo.download && (
+              <a
+                href={repo.download.href}
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-5 text-[14px] font-medium text-fg no-underline transition hover:border-fg-subtle hover:bg-btn hover:no-underline"
+              >
+                <DownloadIcon size={16} />
+                {repo.download.label}
               </a>
             )}
             {repo.github && (

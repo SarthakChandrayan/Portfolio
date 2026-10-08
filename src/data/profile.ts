@@ -20,6 +20,8 @@ export const profile = {
 
 export type Repo = {
   name: string
+  /** Short name for the terminal and search; defaults to the first word of `name`. */
+  slug?: string
   description: string
   language: string
   languageColor: string
@@ -31,11 +33,14 @@ export type Repo = {
   logo?: string
   /** Wide wordmark; rendered larger than the square project marks. */
   wideLogo?: boolean
+  /** Direct download for an installable app, shown as its own button. */
+  download?: { href: string; label: string }
 }
 
 export const repos: Repo[] = [
   {
-    name: 'Planar (meeting analyzer)',
+    name: 'AI meeting analyzer',
+    slug: 'planar',
     description:
       'Local AI meeting analyzer. Paste an engineering meeting transcript and get a traceable record: decisions, requirements, tasks with owners and due dates, risks, open questions, and an implementation plan, each linked to the lines it came from.',
     language: 'Python',
@@ -85,6 +90,28 @@ export const repos: Repo[] = [
       'Edit text, highlight, underline, and strikethrough on the page, then export a new PDF with pdf-lib',
       'Draw freehand, lines, arrows, and shapes, insert images, and reorder, rotate, duplicate, or delete pages',
       'Express API stores uploaded PDFs and version history in Neon Postgres',
+    ],
+  },
+  {
+    name: 'Screenshot Findr',
+    description:
+      'Windows app that searches your screenshots by the text inside them, and by meaning, with auto-tags, duplicate cleanup, and a weekly nudge about the ones you forgot. Everything stays on your machine.',
+    language: 'Python',
+    languageColor: '#3572A5',
+    topics: ['flask', 'sqlite', 'ocr', 'fastembed'],
+    private: false,
+    href: 'https://sarthakchandrayan.github.io/Screenshot-findr/',
+    github: 'https://github.com/SarthakChandrayan/Screenshot-findr',
+    logo: '/screenshot-findr-logo.svg',
+    download: {
+      href: 'https://github.com/SarthakChandrayan/Screenshot-findr/releases/latest/download/ScreenshotFindr-windows.zip',
+      label: 'Download for Windows',
+    },
+    highlights: [
+      'Reads every screenshot with the OCR engine built into Windows 10/11 (Tesseract as a fallback) into a SQLite FTS5 index, re-scanning every minute and only reading new or changed files',
+      'Optional meaning search with a small local embedding model (fastembed): "shoes I wanted to buy" finds a page that says sneakers',
+      'Perceptual hashing groups look-alike screenshots and sends the extras to the Recycle Bin, never a permanent delete; rule-based auto-tags and a weekly Task Scheduler digest of forgotten shots',
+      'Ships as a PyInstaller .exe built and smoke-tested in GitHub Actions, plus a browser demo on GitHub Pages driven by data from the real pipeline',
     ],
   },
   {
@@ -235,11 +262,11 @@ export const skills = {
     },
     {
       title: 'Backend',
-      items: ['Node.js', 'Express', 'Python', 'FastAPI', 'REST', 'Socket.IO', 'Stripe'],
+      items: ['Node.js', 'Express', 'Python', 'FastAPI', 'Flask', 'REST', 'Socket.IO', 'Stripe'],
     },
     {
       title: 'Data',
-      items: ['PostgreSQL', 'Prisma', 'MongoDB'],
+      items: ['PostgreSQL', 'Prisma', 'MongoDB', 'SQLite'],
     },
     {
       title: 'AI',

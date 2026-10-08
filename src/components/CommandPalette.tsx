@@ -156,7 +156,7 @@ export function CommandPalette({
           id: `repo-${repo.name}`,
           group: 'Projects',
           label: repo.name,
-          hint: repoStatus(repo).label,
+          hint: repo.slug ? `${repo.slug} · ${repoStatus(repo).label}` : repoStatus(repo).label,
           icon: repo.href ? LinkExternalIcon : RepoIcon,
           run: () => onOpenProject(index),
         }),
