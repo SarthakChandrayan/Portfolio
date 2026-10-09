@@ -1,6 +1,7 @@
 import { ChevronDownIcon } from '@primer/octicons-react'
 import { useState, type CSSProperties } from 'react'
 import { experience } from '../data/profile'
+import { Collapse } from './Motion'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -116,7 +117,7 @@ export function ExperiencePanel() {
                       />
                     </div>
                   </div>
-                  <div className={`expand ${expanded ? 'is-open' : ''}`} inert={!expanded}>
+                  <Collapse open={expanded}>
                     <div>
                       <div className="stagger mt-3 space-y-1.5 border-t border-border pt-3">
                         {role.summary && (
@@ -134,7 +135,7 @@ export function ExperiencePanel() {
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </Collapse>
                 </button>
               </li>
             )

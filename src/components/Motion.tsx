@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -283,6 +284,53 @@ export function ScrollProgress() {
           background: '#ffffff',
         }}
       />
+    </div>
+  )
+}
+
+/**
+ * Animated open/close by measured height. Replaces a CSS grid-rows trick that
+ * WebKit (iOS Safari/Chrome) didn't re-measure on collapse, leaving a blank gap.
+ */
+export function Collapse({
+  open,
+  children,
+}: {
+  open: boolean
+  children: ReactNode
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const mounted = useRef(false)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const settle = () => {
+      el.style.height = open ? 'auto' : '0px'
+    }
+    if (!mounted.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      mounted.current = true
+      settle()
+      return
+    }
+    // From the current pixel height to the target, then release to `auto` when open.
+    el.style.height = `${el.getBoundingClientRect().height}px`
+    void el.offsetHeight
+    el.style.height = open ? `${el.scrollHeight}px` : '0px'
+    const onEnd = (e: TransitionEvent) => {
+      if (e.target === el && e.propertyName === 'height') settle()
+    }
+    el.addEventListener('transitionend', onEnd)
+    const fallback = window.setTimeout(settle, 450)
+    return () => {
+      el.removeEventListener('transitionend', onEnd)
+      window.clearTimeout(fallback)
+    }
+  }, [open])
+
+  return (
+    <div ref={ref} className={`expand ${open ? 'is-open' : ''}`} inert={!open}>
+      {children}
     </div>
   )
 }

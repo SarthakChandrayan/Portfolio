@@ -2,6 +2,7 @@ import { LinkExternalIcon, MarkGithubIcon } from '@primer/octicons-react'
 import { useState, type CSSProperties } from 'react'
 import { skills, type Repo } from '../data/profile'
 import { projectsUsing, usedAtWork } from '../lib/skills'
+import { Collapse } from './Motion'
 
 const allSkills = [
   ...skills.core.map((item) => item.name),
@@ -65,7 +66,7 @@ export function SkillsPanel() {
         })}
       </div>
 
-      <div className={`expand ${picked ? 'is-open' : ''}`} inert={!picked}>
+      <Collapse open={Boolean(picked)}>
         <div>
           {shown && (
             <div
@@ -97,7 +98,7 @@ export function SkillsPanel() {
             </div>
           )}
         </div>
-      </div>
+      </Collapse>
 
       <div className="mt-7 divide-y divide-border border-t border-border">
         {skills.groups.map((group) => (

@@ -47,6 +47,7 @@ export const repos: Repo[] = [
     languageColor: '#3572A5',
     topics: ['fastapi', 'ollama', 'react'],
     private: false,
+    href: 'https://planar.sarthakchandrayan.com/',
     github: 'https://github.com/SarthakChandrayan/SpecForge',
     logo: '/planar-logo.png',
     wideLogo: true,
