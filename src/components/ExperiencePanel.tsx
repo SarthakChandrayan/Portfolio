@@ -76,14 +76,27 @@ export function ExperiencePanel() {
                     }`}
                   />
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setOpen(expanded ? '' : id)}
-                  className={`w-full rounded-3xl border bg-canvas-overlay/70 p-4 text-left transition-colors tap-press hover:border-fg-subtle ${
+                {/* The panel sits outside the button: WebKit doesn't re-measure a
+                    <button> whose block content collapses, leaving a blank gap. */}
+                <div
+                  className={`rounded-3xl border bg-canvas-overlay/70 p-4 transition-colors hover:border-fg-subtle ${
                     expanded ? 'border-white/30' : 'border-border'
                   }`}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={expanded}
+                    onClick={() => setOpen(expanded ? '' : id)}
+                    onKeyDown={(e) => {
+                      if (e.target !== e.currentTarget) return
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setOpen(expanded ? '' : id)
+                      }
+                    }}
+                    className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-left tap-press"
+                  >
                     <div>
                       <div className="text-[12px] text-fg-muted">
                         {role.period}
@@ -136,7 +149,7 @@ export function ExperiencePanel() {
                       </div>
                     </div>
                   </Collapse>
-                </button>
+                </div>
               </li>
             )
           })}
