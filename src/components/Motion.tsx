@@ -305,8 +305,13 @@ export function Collapse({
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
+    // Snap to the final height with transitions off, so a stalled transition
+    // (seen on mobile browsers) can't leave a collapsed panel at full height.
     const settle = () => {
+      el.style.transition = 'none'
       el.style.height = open ? 'auto' : '0px'
+      void el.offsetHeight
+      el.style.transition = ''
     }
     if (!mounted.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       mounted.current = true
